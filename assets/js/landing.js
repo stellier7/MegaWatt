@@ -144,19 +144,10 @@ function initFeaturedCarousel() {
   );
 }
 
-function initGalleryCarousel() {
-  initAutoCarousel(
-    document.getElementById('galleryTrack'),
-    document.getElementById('galleryCarousel'),
-    { speed: 0.4, staticClass: 'gallery-carousel--static' }
-  );
-}
-
 function initLanding() {
   initHeroParallax();
   initBoltField();
   initCardTilt();
   initReveal();
   initFeaturedCarousel();
-  initGalleryCarousel();
 }

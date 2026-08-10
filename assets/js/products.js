@@ -1,7 +1,7 @@
 // aplicacion: 'Interior' | 'Exterior' | 'Emergencia' | 'Pendiente'
 // Set `image` to an assets/images path; empty string keeps “Foto pendiente”.
 // Optional `ratio`: '9/16' for tall media (street lights). Default card ratio is 1/1.
-// Display order: spots → focos → emergencia → street
+// Display order: spots → focos → street → emergencia
 const img = (file) => (file ? `assets/images/${file}` : '');
 
 const products = [
@@ -177,19 +177,6 @@ const products = [
     image: img(`foco-${w}W.jpeg`),
   })),
 
-  // --- Emergencia ---
-  {
-    nombre: 'Bombillo LED de Emergencia',
-    categoria: 'Iluminación de Emergencia',
-    subcategoria: 'Bombillos LED de Emergencia',
-    tipo: 'Bombillo LED de Emergencia',
-    potencia: '—',
-    temp: '6500K',
-    forma: '—',
-    aplicacion: 'Emergencia',
-    image: img('emergencia.mov'),
-  },
-
   // --- Street ---
   {
     nombre: 'LED Street Light 150W',
@@ -214,6 +201,19 @@ const products = [
     aplicacion: 'Exterior',
     ratio: '9/16',
     image: img('street-200W.jpeg'),
+  },
+
+  // --- Emergencia ---
+  {
+    nombre: 'Bombillo LED de Emergencia',
+    categoria: 'Iluminación de Emergencia',
+    subcategoria: 'Bombillos LED de Emergencia',
+    tipo: 'Bombillo LED de Emergencia',
+    potencia: '—',
+    temp: '6500K',
+    forma: '—',
+    aplicacion: 'Emergencia',
+    image: img('emergencia.mov'),
   },
 ];
 

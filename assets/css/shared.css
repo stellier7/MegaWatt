@@ -622,14 +622,11 @@ a { color: inherit; }
 }
 
 .gallery-carousel {
-  overflow-x: auto;
-  overflow-y: hidden;
-  scroll-snap-type: x mandatory;
-  scroll-behavior: smooth;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: thin;
-  scrollbar-color: var(--orange) transparent;
+  overflow: hidden;
+  touch-action: pan-y pinch-zoom;
   cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
   -webkit-mask-image: linear-gradient(90deg, transparent, #000 3%, #000 97%, transparent);
   mask-image: linear-gradient(90deg, transparent, #000 3%, #000 97%, transparent);
   padding: 4px 0 12px;
@@ -637,13 +634,6 @@ a { color: inherit; }
 
 .gallery-carousel.is-dragging {
   cursor: grabbing;
-  scroll-snap-type: none;
-  scroll-behavior: auto;
-}
-
-.gallery-carousel.is-jumping {
-  scroll-snap-type: none;
-  scroll-behavior: auto;
 }
 
 .gallery-track {
@@ -652,6 +642,8 @@ a { color: inherit; }
   gap: 20px;
   width: max-content;
   padding: 0 24px;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
 }
 
 .gallery-slide {
@@ -664,7 +656,6 @@ a { color: inherit; }
   background: var(--charcoal-soft);
   transition: border-color 0.25s ease, transform 0.25s ease;
   cursor: pointer;
-  scroll-snap-align: center;
   text-align: left;
   font: inherit;
   color: inherit;
@@ -766,6 +757,7 @@ body.gallery-lightbox-open {
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: opacity 0.25s ease, transform 0.25s ease;
 }
 
 .gallery-lightbox-media {
@@ -839,25 +831,33 @@ body.gallery-lightbox-open {
   .gallery-lightbox-close { top: 8px; right: 8px; }
 }
 
-.gallery-carousel--static {
-  overflow-x: auto;
-  -webkit-mask-image: none;
-  mask-image: none;
-  scroll-snap-type: x mandatory;
-  scrollbar-width: thin;
+.gallery-lightbox-swipe-hint {
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+  margin: 0;
 }
 
-.gallery-carousel--static .gallery-track {
-  transform: none !important;
+.gallery-lightbox-stage {
+  transition: opacity 0.25s ease, transform 0.25s ease;
 }
 
-.gallery-carousel--static .gallery-slide {
-  scroll-snap-align: start;
+.gallery-lightbox-stage.slide-from-left {
+  opacity: 0.7;
+  transform: translateX(18px);
+}
+
+.gallery-lightbox-stage.slide-from-right {
+  opacity: 0.7;
+  transform: translateX(-18px);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .gallery-carousel {
-    scroll-behavior: auto;
+  .gallery-lightbox-stage {
+    transition: none;
   }
 }
 

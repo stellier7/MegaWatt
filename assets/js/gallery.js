@@ -47,73 +47,141 @@ function renderGalleryCarousel() {
   const track = document.getElementById('galleryTrack');
   if (!track || !galleryItems.length) return;
   const slides = galleryItems.map(gallerySlideHtml).join('');
-  track.innerHTML = slides + slides + slides;
+  track.innerHTML = slides + slides;
 }
 
-function initGalleryInfiniteScroll() {
+function initGalleryDragCarousel() {
   const carousel = document.getElementById('galleryCarousel');
   const track = document.getElementById('galleryTrack');
   if (!carousel || !track || galleryItems.length < 2) return;
 
-  let setWidth = 0;
-  let isJumping = false;
+  let offset = 0;
+  let loopWidth = 0;
+  let isDragging = false;
+  let startX = 0;
+  let startOffset = 0;
+  let moved = 0;
+  let velocity = 0;
+  let lastX = 0;
+  let lastTime = 0;
+  let momentumId = 0;
 
   const measure = () => {
-    setWidth = track.scrollWidth / 3;
+    loopWidth = track.scrollWidth / 2;
+    if (loopWidth > 0) {
+      while (offset >= loopWidth) offset -= loopWidth;
+      while (offset < 0) offset += loopWidth;
+    }
+    applyTransform();
   };
 
-  const jumpToMiddle = () => {
-    measure();
-    if (setWidth > 0) {
-      isJumping = true;
-      carousel.scrollLeft = setWidth;
-      isJumping = false;
+  const applyTransform = () => {
+    track.style.transform = `translate3d(-${offset}px, 0, 0)`;
+  };
+
+  const normalizeOffset = () => {
+    if (loopWidth <= 0) return;
+    while (offset >= loopWidth) offset -= loopWidth;
+    while (offset < 0) offset += loopWidth;
+  };
+
+  const stopMomentum = () => {
+    if (momentumId) {
+      cancelAnimationFrame(momentumId);
+      momentumId = 0;
     }
   };
 
-  const normalizeScroll = () => {
-    if (isJumping || !setWidth) return;
-
-    const x = carousel.scrollLeft;
-    const edge = Math.max(8, carousel.clientWidth * 0.02);
-
-    if (x >= setWidth * 2 - edge) {
-      isJumping = true;
-      carousel.scrollLeft = x - setWidth;
-      isJumping = false;
-    } else if (x <= edge) {
-      isJumping = true;
-      carousel.scrollLeft = x + setWidth;
-      isJumping = false;
-    }
+  const startMomentum = () => {
+    stopMomentum();
+    const step = () => {
+      if (Math.abs(velocity) < 0.08) {
+        momentumId = 0;
+        return;
+      }
+      offset -= velocity;
+      velocity *= 0.94;
+      normalizeOffset();
+      applyTransform();
+      momentumId = requestAnimationFrame(step);
+    };
+    momentumId = requestAnimationFrame(step);
   };
 
-  jumpToMiddle();
+  const onPointerDown = (e) => {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    stopMomentum();
+    isDragging = true;
+    moved = 0;
+    startX = e.clientX;
+    lastX = e.clientX;
+    lastTime = performance.now();
+    startOffset = offset;
+    velocity = 0;
+    carousel.classList.add('is-dragging');
+    carousel.setPointerCapture(e.pointerId);
+  };
 
-  if ('ResizeObserver' in window) {
-    const ro = new ResizeObserver(() => {
-      const ratio = setWidth > 0 ? carousel.scrollLeft / setWidth : 1;
-      measure();
-      if (setWidth > 0) {
-        isJumping = true;
-        carousel.scrollLeft = setWidth * Math.min(Math.max(ratio, 1), 2);
-        isJumping = false;
+  const onPointerMove = (e) => {
+    if (!isDragging) return;
+    const now = performance.now();
+    const delta = e.clientX - startX;
+    moved = Math.max(moved, Math.abs(delta));
+
+    if (now - lastTime > 0) {
+      velocity = (e.clientX - lastX) / (now - lastTime);
+    }
+    lastX = e.clientX;
+    lastTime = now;
+
+    offset = startOffset - delta;
+    normalizeOffset();
+    applyTransform();
+  };
+
+  const onPointerUp = (e) => {
+    if (!isDragging) return;
+    isDragging = false;
+    carousel.classList.remove('is-dragging');
+    if (carousel.hasPointerCapture?.(e.pointerId)) {
+      carousel.releasePointerCapture(e.pointerId);
+    }
+
+    carousel.querySelectorAll('.gallery-slide').forEach((slide) => {
+      slide.dataset.dragged = moved > 10 ? 'true' : 'false';
+      if (moved > 10) {
+        window.setTimeout(() => {
+          slide.dataset.dragged = 'false';
+        }, 0);
       }
     });
+
+    if (moved > 10) {
+      startMomentum();
+    }
+  };
+
+  carousel.addEventListener('pointerdown', onPointerDown);
+  carousel.addEventListener('pointermove', onPointerMove);
+  carousel.addEventListener('pointerup', onPointerUp);
+  carousel.addEventListener('pointercancel', onPointerUp);
+
+  if ('ResizeObserver' in window) {
+    const ro = new ResizeObserver(measure);
     ro.observe(track);
+  } else {
+    window.addEventListener('resize', measure, { passive: true });
   }
 
   window.addEventListener(
     'orientationchange',
     () => {
-      window.setTimeout(jumpToMiddle, 250);
+      window.setTimeout(measure, 250);
     },
     { passive: true }
   );
 
-  carousel.addEventListener('scroll', normalizeScroll, { passive: true });
-
-  return normalizeScroll;
+  measure();
 }
 
 function ensureGalleryLightbox() {
@@ -132,6 +200,7 @@ function ensureGalleryLightbox() {
       <button type="button" class="gallery-lightbox-nav gallery-lightbox-next" data-gallery-next aria-label="Siguiente">›</button>
       <div class="gallery-lightbox-stage" id="galleryLightboxStage"></div>
       <p class="gallery-lightbox-caption" id="galleryLightboxCaption"></p>
+      <p class="gallery-lightbox-swipe-hint" aria-hidden="true">Desliza para ver más</p>
     </div>
   `;
   document.body.appendChild(lightbox);
@@ -144,20 +213,31 @@ function initGalleryLightbox() {
   const captionEl = document.getElementById('galleryLightboxCaption');
   let activeIndex = 0;
   let lastFocus = null;
+  let swipeStartX = 0;
+  let swipeStartY = 0;
 
-  const renderSlide = (index) => {
+  const renderSlide = (index, direction = 0) => {
     const item = galleryItems[index];
     if (!item || !stage) return;
 
     activeIndex = index;
+    stage.classList.remove('slide-from-left', 'slide-from-right');
+    if (direction < 0) stage.classList.add('slide-from-left');
+    if (direction > 0) stage.classList.add('slide-from-right');
+
     stage.innerHTML = `<div class="gallery-lightbox-media">${galleryMediaHtml(item, { preview: false })}</div>`;
     if (captionEl) captionEl.textContent = item.caption || '';
 
     const video = stage.querySelector('video');
     if (video) {
-      video.muted = false;
+      video.muted = true;
+      video.defaultMuted = true;
       video.play().catch(() => {});
     }
+
+    window.requestAnimationFrame(() => {
+      stage.classList.remove('slide-from-left', 'slide-from-right');
+    });
   };
 
   const open = (index) => {
@@ -182,7 +262,7 @@ function initGalleryLightbox() {
 
   const showNext = (step) => {
     const next = (activeIndex + step + galleryItems.length) % galleryItems.length;
-    renderSlide(next);
+    renderSlide(next, step);
   };
 
   document.getElementById('galleryTrack')?.addEventListener('click', (e) => {
@@ -200,6 +280,44 @@ function initGalleryLightbox() {
   lightbox.querySelector('[data-gallery-prev]')?.addEventListener('click', () => showNext(-1));
   lightbox.querySelector('[data-gallery-next]')?.addEventListener('click', () => showNext(1));
 
+  const onSwipeStart = (x, y) => {
+    swipeStartX = x;
+    swipeStartY = y;
+  };
+
+  const onSwipeEnd = (x, y) => {
+    const dx = x - swipeStartX;
+    const dy = y - swipeStartY;
+    if (Math.abs(dx) < 48 || Math.abs(dx) < Math.abs(dy)) return;
+    showNext(dx < 0 ? 1 : -1);
+  };
+
+  stage?.addEventListener(
+    'touchstart',
+    (e) => {
+      onSwipeStart(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+    },
+    { passive: true }
+  );
+
+  stage?.addEventListener(
+    'touchend',
+    (e) => {
+      onSwipeEnd(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+    },
+    { passive: true }
+  );
+
+  stage?.addEventListener('pointerdown', (e) => {
+    if (e.pointerType === 'touch') return;
+    onSwipeStart(e.clientX, e.clientY);
+  });
+
+  stage?.addEventListener('pointerup', (e) => {
+    if (e.pointerType === 'touch') return;
+    onSwipeEnd(e.clientX, e.clientY);
+  });
+
   document.addEventListener('keydown', (e) => {
     if (lightbox.hidden) return;
     if (e.key === 'Escape') close();
@@ -208,61 +326,8 @@ function initGalleryLightbox() {
   });
 }
 
-function initGalleryScroll() {
-  const carousel = document.getElementById('galleryCarousel');
-  if (!carousel) return;
-
-  const normalizeScroll = initGalleryInfiniteScroll();
-
-  let isDown = false;
-  let startX = 0;
-  let scrollLeft = 0;
-  let moved = 0;
-
-  carousel.addEventListener('pointerdown', (e) => {
-    if (e.target.closest('.gallery-lightbox')) return;
-    isDown = true;
-    moved = 0;
-    startX = e.clientX;
-    scrollLeft = carousel.scrollLeft;
-    carousel.classList.add('is-dragging');
-    carousel.setPointerCapture(e.pointerId);
-  });
-
-  carousel.addEventListener('pointermove', (e) => {
-    if (!isDown) return;
-    const walk = e.clientX - startX;
-    moved = Math.max(moved, Math.abs(walk));
-    carousel.scrollLeft = scrollLeft - walk;
-  });
-
-  const endDrag = (e) => {
-    if (!isDown) return;
-    isDown = false;
-    carousel.classList.remove('is-dragging');
-    if (carousel.hasPointerCapture?.(e.pointerId)) {
-      carousel.releasePointerCapture(e.pointerId);
-    }
-
-    normalizeScroll?.();
-
-    carousel.querySelectorAll('.gallery-slide').forEach((slide) => {
-      slide.dataset.dragged = moved > 8 ? 'true' : 'false';
-      if (moved > 8) {
-        setTimeout(() => {
-          slide.dataset.dragged = 'false';
-        }, 0);
-      }
-    });
-  };
-
-  carousel.addEventListener('pointerup', endDrag);
-  carousel.addEventListener('pointercancel', endDrag);
-  carousel.addEventListener('pointerleave', endDrag);
-}
-
 function initGallery() {
   renderGalleryCarousel();
+  initGalleryDragCarousel();
   initGalleryLightbox();
-  initGalleryScroll();
 }

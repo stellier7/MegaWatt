@@ -31,16 +31,37 @@
   <div class="container">
     <div class="filters">
       <div class="filter-group">
-        <label class="fg-label" for="wattSelect">Potencia</label>
-        <select id="wattSelect" class="filter-select"></select>
+        <span class="fg-label" id="wattFilterLabel">Potencia</span>
+        <div class="filter-dropdown" id="wattFilter" data-filter-key="watt" data-layout="grid">
+          <button type="button" class="filter-dropdown-trigger" id="wattFilterTrigger" aria-labelledby="wattFilterLabel" aria-haspopup="listbox" aria-expanded="false">
+            <span class="filter-dropdown-value">Todas</span>
+          </button>
+          <div class="filter-dropdown-panel" hidden>
+            <ul class="filter-dropdown-list filter-dropdown-list--grid" role="listbox" aria-labelledby="wattFilterLabel"></ul>
+          </div>
+        </div>
       </div>
       <div class="filter-group">
-        <label class="fg-label" for="shapeSelect">Forma</label>
-        <select id="shapeSelect" class="filter-select"></select>
+        <span class="fg-label" id="shapeFilterLabel">Forma</span>
+        <div class="filter-dropdown" id="shapeFilter" data-filter-key="shape">
+          <button type="button" class="filter-dropdown-trigger" id="shapeFilterTrigger" aria-labelledby="shapeFilterLabel" aria-haspopup="listbox" aria-expanded="false">
+            <span class="filter-dropdown-value">Todas</span>
+          </button>
+          <div class="filter-dropdown-panel" hidden>
+            <ul class="filter-dropdown-list" role="listbox" aria-labelledby="shapeFilterLabel"></ul>
+          </div>
+        </div>
       </div>
       <div class="filter-group">
-        <label class="fg-label" for="appSelect">Aplicación</label>
-        <select id="appSelect" class="filter-select"></select>
+        <span class="fg-label" id="appFilterLabel">Aplicación</span>
+        <div class="filter-dropdown" id="appFilter" data-filter-key="app">
+          <button type="button" class="filter-dropdown-trigger" id="appFilterTrigger" aria-labelledby="appFilterLabel" aria-haspopup="listbox" aria-expanded="false">
+            <span class="filter-dropdown-value">Todas</span>
+          </button>
+          <div class="filter-dropdown-panel" hidden>
+            <ul class="filter-dropdown-list" role="listbox" aria-labelledby="appFilterLabel"></ul>
+          </div>
+        </div>
       </div>
     </div>
     <div class="grid" id="productGrid"></div>

@@ -302,16 +302,104 @@ function featuredCardHtml(p) {
   `;
 }
 
-function renderSelectFilter(selectId, options, key) {
-  const el = document.getElementById(selectId);
-  if (!el) return;
-  el.innerHTML = options
-    .map((o) => `<option value="${o}"${catalogState[key] === o ? ' selected' : ''}>${o}</option>`)
+function updateFilterDropdownTrigger(dropdown) {
+  const key = dropdown.dataset.filterKey;
+  const valueEl = dropdown.querySelector('.filter-dropdown-value');
+  if (valueEl && key) valueEl.textContent = catalogState[key];
+}
+
+function renderFilterDropdownOptions(dropdown) {
+  const key = dropdown.dataset.filterKey;
+  const list = dropdown.querySelector('.filter-dropdown-list');
+  if (!list || !key) return;
+
+  const options =
+    key === 'watt' ? wattOptions : key === 'shape' ? shapeOptions : key === 'app' ? appOptions : [];
+
+  list.innerHTML = options
+    .map(
+      (option) => `
+      <li>
+        <button
+          type="button"
+          class="filter-dropdown-option${catalogState[key] === option ? ' is-selected' : ''}"
+          role="option"
+          aria-selected="${catalogState[key] === option}"
+          data-value="${option}"
+        >${option}</button>
+      </li>`
+    )
     .join('');
-  el.onchange = () => {
-    catalogState[key] = el.value;
-    renderProductGrid();
-  };
+
+  updateFilterDropdownTrigger(dropdown);
+}
+
+function closeAllFilterDropdowns() {
+  document.querySelectorAll('.filter-dropdown.open').forEach((dropdown) => {
+    dropdown.classList.remove('open');
+    const trigger = dropdown.querySelector('.filter-dropdown-trigger');
+    const panel = dropdown.querySelector('.filter-dropdown-panel');
+    if (trigger) trigger.setAttribute('aria-expanded', 'false');
+    if (panel) panel.hidden = true;
+  });
+}
+
+function openFilterDropdown(dropdown) {
+  closeAllFilterDropdowns();
+  const trigger = dropdown.querySelector('.filter-dropdown-trigger');
+  const panel = dropdown.querySelector('.filter-dropdown-panel');
+  dropdown.classList.add('open');
+  if (trigger) trigger.setAttribute('aria-expanded', 'true');
+  if (panel) panel.hidden = false;
+  renderFilterDropdownOptions(dropdown);
+}
+
+function initFilterDropdowns() {
+  const dropdowns = document.querySelectorAll('.filter-dropdown');
+  if (!dropdowns.length) return;
+
+  dropdowns.forEach((dropdown) => {
+    const trigger = dropdown.querySelector('.filter-dropdown-trigger');
+    const list = dropdown.querySelector('.filter-dropdown-list');
+    if (!trigger || !list) return;
+
+    renderFilterDropdownOptions(dropdown);
+
+    trigger.addEventListener('click', () => {
+      if (dropdown.classList.contains('open')) {
+        closeAllFilterDropdowns();
+      } else {
+        openFilterDropdown(dropdown);
+      }
+    });
+
+    list.addEventListener('click', (e) => {
+      const option = e.target.closest('.filter-dropdown-option');
+      if (!option) return;
+
+      const key = dropdown.dataset.filterKey;
+      if (!key) return;
+
+      catalogState[key] = option.dataset.value;
+      renderFilterDropdownOptions(dropdown);
+      renderProductGrid();
+      closeAllFilterDropdowns();
+      trigger.focus();
+    });
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.filter-dropdown')) closeAllFilterDropdowns();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    const openDropdown = document.querySelector('.filter-dropdown.open');
+    if (!openDropdown) return;
+    const trigger = openDropdown.querySelector('.filter-dropdown-trigger');
+    closeAllFilterDropdowns();
+    trigger?.focus();
+  });
 }
 
 function renderProductGrid() {
@@ -349,8 +437,6 @@ function initFeatured() {
 }
 
 function initCatalog() {
-  renderSelectFilter('wattSelect', wattOptions, 'watt');
-  renderSelectFilter('shapeSelect', shapeOptions, 'shape');
-  renderSelectFilter('appSelect', appOptions, 'app');
+  initFilterDropdowns();
   renderProductGrid();
 }

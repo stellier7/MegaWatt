@@ -2,7 +2,8 @@ const galleryItems = [
   {
     type: 'image',
     src: 'assets/images/gallery/gallery1.jpeg',
-    caption: 'Instalación MegaWatt',
+    caption: 'MegaWatt',
+    objectPosition: 'center 22%',
   },
   {
     type: 'video',
@@ -30,7 +31,8 @@ function galleryMediaHtml(item, { preview = true } = {}) {
     const controls = preview ? '' : 'controls ';
     return `<video src="${item.src}" ${controls}muted playsinline loop autoplay preload="metadata" aria-label="${item.caption}"></video>`;
   }
-  return `<img src="${item.src}" alt="${item.caption}" loading="lazy">`;
+  const positionStyle = item.objectPosition ? ` style="object-position: ${item.objectPosition}"` : '';
+  return `<img src="${item.src}" alt="${item.caption}" loading="lazy"${positionStyle}>`;
 }
 
 function gallerySlideHtml(item, index) {

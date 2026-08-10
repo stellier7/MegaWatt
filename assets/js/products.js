@@ -1,4 +1,4 @@
-// aplicacion: 'Interior' | 'Exterior' | 'Emergencia' | 'Pendiente'
+// aplicacion: 'Interior' | 'Exterior' | 'Emergencia'
 // Set `image` to an assets/images path; empty string keeps “Foto pendiente”.
 // Optional `ratio`: '9/16' for tall media (street lights). Default card ratio is 1/1.
 // Display order: spots → focos → street → emergencia
@@ -172,7 +172,7 @@ const products = [
     potencia: w + 'W',
     temp: '6500K',
     forma: 'Focos',
-    aplicacion: 'Pendiente',
+    aplicacion: 'Exterior',
     ratio: '5/7',
     image: img(`foco-${w}W.jpeg`),
   })),
@@ -217,23 +217,15 @@ const products = [
   },
 ];
 
-const categories = [
-  'Todos',
-  'Iluminación Interior',
-  'Iluminación Exterior',
-  'Iluminación de Emergencia',
-];
-
 const wattOptions = [
   'Todas',
   ...Array.from(new Set(products.map((p) => p.potencia))).filter((p) => p !== '—'),
 ];
 
 const shapeOptions = ['Todas', 'Redondo', 'Cuadrado', 'Focos'];
-const appOptions = ['Todas', 'Interior', 'Exterior', 'Emergencia', 'Pendiente'];
+const appOptions = ['Todas', 'Interior', 'Exterior', 'Emergencia'];
 
 const catalogState = {
-  cat: 'Todos',
   watt: 'Todas',
   shape: 'Todas',
   app: 'Todas',
@@ -286,7 +278,7 @@ function productCardHtml(p) {
         <div class="p-specs">
           <span>${p.temp}</span>
           ${p.forma !== '—' ? `<span>${p.forma}</span>` : ''}
-          <span>${p.aplicacion === 'Pendiente' ? 'Aplicación pendiente' : p.aplicacion}</span>
+          <span>${p.aplicacion}</span>
         </div>
       </div>
     </div>
@@ -303,29 +295,11 @@ function featuredCardHtml(p) {
         <div class="p-specs">
           <span>${p.temp}</span>
           ${p.forma !== '—' ? `<span>${p.forma}</span>` : ''}
-          <span>${p.aplicacion === 'Pendiente' ? 'Aplicación pendiente' : p.aplicacion}</span>
+          <span>${p.aplicacion}</span>
         </div>
       </div>
     </div>
   `;
-}
-
-function renderCatalogTabs() {
-  const el = document.getElementById('catTabs');
-  if (!el) return;
-  el.innerHTML = categories
-    .map(
-      (c) =>
-        `<button type="button" class="cat-tab ${catalogState.cat === c ? 'active' : ''}" data-cat="${c}">${c}</button>`
-    )
-    .join('');
-  el.querySelectorAll('.cat-tab').forEach((b) => {
-    b.addEventListener('click', () => {
-      catalogState.cat = b.dataset.cat;
-      renderCatalogTabs();
-      renderProductGrid();
-    });
-  });
 }
 
 function renderSelectFilter(selectId, options, key) {
@@ -347,7 +321,6 @@ function renderProductGrid() {
 
   const filtered = products.filter(
     (p) =>
-      (catalogState.cat === 'Todos' || p.categoria === catalogState.cat) &&
       (catalogState.watt === 'Todas' || p.potencia === catalogState.watt) &&
       (catalogState.shape === 'Todas' || p.forma === catalogState.shape) &&
       (catalogState.app === 'Todas' || p.aplicacion === catalogState.app)
@@ -376,7 +349,6 @@ function initFeatured() {
 }
 
 function initCatalog() {
-  renderCatalogTabs();
   renderSelectFilter('wattSelect', wattOptions, 'watt');
   renderSelectFilter('shapeSelect', shapeOptions, 'shape');
   renderSelectFilter('appSelect', appOptions, 'app');

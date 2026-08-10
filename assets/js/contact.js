@@ -25,7 +25,7 @@ function buildDistributorLeadMessage() {
   if (name) lines.push('Nombre: ' + name);
   if (business) lines.push('Negocio: ' + business);
   if (phone) lines.push('Teléfono: ' + phone);
-  if (city) lines.push('Ciudad y país: ' + city);
+  if (city) lines.push('Ciudad, País: ' + city);
   if (seller) lines.push('Referido por: ' + seller);
 
   return lines.join('\n').trim();

@@ -294,10 +294,11 @@ a { color: inherit; }
 
 .filters {
   display: flex;
-  gap: 22px;
+  gap: 16px;
   flex-wrap: wrap;
   justify-content: center;
-  padding: 18px 20px;
+  align-items: flex-end;
+  padding: 10px 16px;
   margin: 0 0 40px;
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.03);
@@ -307,8 +308,8 @@ a { color: inherit; }
 .filter-group {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  align-items: center;
+  gap: 6px;
+  align-items: flex-start;
 }
 
 .filter-group .fg-label {
@@ -318,30 +319,32 @@ a { color: inherit; }
   color: var(--steel);
 }
 
-.chip-row {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-  justify-content: center;
-  max-width: 340px;
-}
-
-.chip {
-  font-size: 12px;
-  padding: 6px 12px;
+.filter-select {
+  min-width: 140px;
+  padding: 8px 32px 8px 12px;
   border-radius: 8px;
   border: 1px solid var(--line);
-  background: transparent;
+  background: rgba(255, 255, 255, 0.04);
   color: var(--steel-light);
-  cursor: pointer;
+  font-family: 'Manrope', sans-serif;
+  font-size: 13px;
   font-weight: 600;
-  transition: all .15s ease;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23a8b4c4' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  transition: border-color .15s ease;
 }
 
-.chip.active {
-  background: var(--amber);
-  color: #241300;
-  border-color: var(--amber);
+.filter-select:focus {
+  outline: none;
+  border-color: var(--orange);
+}
+
+.filter-select option {
+  background: var(--charcoal);
+  color: var(--paper);
 }
 
 .grid {

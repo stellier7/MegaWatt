@@ -158,7 +158,7 @@ const products = [
     tipo: 'Foco LED',
     potencia: w + 'W',
     temp: '6500K',
-    forma: '—',
+    forma: 'Focos',
     aplicacion: 'Interior',
     // 7–18W packaging shots are 9:16; 20W uses 5:7
     ...( [7, 9, 12, 15, 18].includes(w) ? { ratio: '9/16' } : { ratio: '5/7' } ),
@@ -171,7 +171,7 @@ const products = [
     tipo: 'Foco LED',
     potencia: w + 'W',
     temp: '6500K',
-    forma: '—',
+    forma: 'Focos',
     aplicacion: 'Pendiente',
     ratio: '5/7',
     image: img(`foco-${w}W.jpeg`),
@@ -229,7 +229,7 @@ const wattOptions = [
   ...Array.from(new Set(products.map((p) => p.potencia))).filter((p) => p !== '—'),
 ];
 
-const shapeOptions = ['Todas', 'Redondo', 'Cuadrado'];
+const shapeOptions = ['Todas', 'Redondo', 'Cuadrado', 'Focos'];
 const appOptions = ['Todas', 'Interior', 'Exterior', 'Emergencia', 'Pendiente'];
 
 const catalogState = {
@@ -328,22 +328,16 @@ function renderCatalogTabs() {
   });
 }
 
-function renderChipRow(containerId, options, key) {
-  const el = document.getElementById(containerId);
+function renderSelectFilter(selectId, options, key) {
+  const el = document.getElementById(selectId);
   if (!el) return;
   el.innerHTML = options
-    .map(
-      (o) =>
-        `<button type="button" class="chip ${catalogState[key] === o ? 'active' : ''}" data-v="${o}">${o}</button>`
-    )
+    .map((o) => `<option value="${o}"${catalogState[key] === o ? ' selected' : ''}>${o}</option>`)
     .join('');
-  el.querySelectorAll('.chip').forEach((b) => {
-    b.addEventListener('click', () => {
-      catalogState[key] = b.dataset.v;
-      renderChipRow(containerId, options, key);
-      renderProductGrid();
-    });
-  });
+  el.onchange = () => {
+    catalogState[key] = el.value;
+    renderProductGrid();
+  };
 }
 
 function renderProductGrid() {
@@ -383,8 +377,8 @@ function initFeatured() {
 
 function initCatalog() {
   renderCatalogTabs();
-  renderChipRow('wattChips', wattOptions, 'watt');
-  renderChipRow('shapeChips', shapeOptions, 'shape');
-  renderChipRow('appChips', appOptions, 'app');
+  renderSelectFilter('wattSelect', wattOptions, 'watt');
+  renderSelectFilter('shapeSelect', shapeOptions, 'shape');
+  renderSelectFilter('appSelect', appOptions, 'app');
   renderProductGrid();
 }

@@ -543,6 +543,15 @@ a { color: inherit; }
   padding: 0 24px;
   will-change: transform;
   transform: translate3d(0, 0, 0);
+  transition: none;
+}
+
+.gallery-track.is-snapping {
+  transition: transform 0.38s cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+.gallery-track.is-snapping.is-wheel-snap {
+  transition: transform 0.46s cubic-bezier(0.25, 1, 0.45, 1);
 }
 
 .gallery-slide {

@@ -68,8 +68,17 @@ function initGalleryDragCarousel() {
   let snapAnimId = 0;
   let wheelSnapTimer = 0;
 
+  let snapCleanupTimer = 0;
+  let pendingTargetIdx = null;
+
   const applyTransform = () => {
     track.style.transform = `translate3d(-${offset}px, 0, 0)`;
+  };
+
+  const readCurrentOffset = () => {
+    const transform = window.getComputedStyle(track).transform;
+    if (!transform || transform === 'none') return offset;
+    return -new DOMMatrix(transform).m41;
   };
 
   const getSlidePitch = () => {
@@ -107,11 +116,68 @@ function initGalleryDragCarousel() {
   };
 
   const stopSnap = () => {
+    if (snapCleanupTimer) {
+      clearTimeout(snapCleanupTimer);
+      snapCleanupTimer = 0;
+    }
+    if (track.classList.contains('is-snapping')) {
+      offset = readCurrentOffset();
+      applyTransform();
+    }
+    track.classList.remove('is-snapping', 'is-wheel-snap');
+    pendingTargetIdx = null;
     if (snapAnimId) {
       cancelAnimationFrame(snapAnimId);
       snapAnimId = 0;
     }
-    track.classList.remove('is-snapping');
+  };
+
+  const finishSnap = (target, targetIdx) => {
+    track.classList.remove('is-snapping', 'is-wheel-snap');
+    if (snapCleanupTimer) {
+      clearTimeout(snapCleanupTimer);
+      snapCleanupTimer = 0;
+    }
+    offset = target;
+    applyTransform();
+    repositionLoop(targetIdx);
+    pendingTargetIdx = null;
+    snapAnimId = 0;
+  };
+
+  const animateSnap = (target, targetIdx, { fromWheel = false } = {}) => {
+    stopSnap();
+
+    if (Math.abs(target - offset) < 1) {
+      finishSnap(target, targetIdx);
+      return;
+    }
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      finishSnap(target, targetIdx);
+      return;
+    }
+
+    pendingTargetIdx = targetIdx;
+    track.classList.add('is-snapping');
+    if (fromWheel) track.classList.add('is-wheel-snap');
+
+    const onTransitionEnd = (e) => {
+      if (e.target !== track || e.propertyName !== 'transform') return;
+      track.removeEventListener('transitionend', onTransitionEnd);
+      finishSnap(target, targetIdx);
+    };
+
+    track.addEventListener('transitionend', onTransitionEnd);
+    snapCleanupTimer = window.setTimeout(() => {
+      track.removeEventListener('transitionend', onTransitionEnd);
+      finishSnap(target, targetIdx);
+    }, fromWheel ? 520 : 440);
+
+    snapAnimId = requestAnimationFrame(() => {
+      offset = target;
+      applyTransform();
+    });
   };
 
   const findSnapTarget = ({ releaseVelocity = 0 } = {}) => {
@@ -162,48 +228,11 @@ function initGalleryDragCarousel() {
     return { target, targetIdx };
   };
 
-  const snapToNearest = (releaseVelocity = 0) => {
+  const snapToNearest = (releaseVelocity = 0, { fromWheel = false } = {}) => {
     if (loopWidth <= 0 || isDragging) return;
 
     const { target, targetIdx } = findSnapTarget({ releaseVelocity });
-    if (Math.abs(target - offset) < 1) {
-      offset = target;
-      repositionLoop(targetIdx);
-      return;
-    }
-
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      offset = target;
-      repositionLoop(targetIdx);
-      return;
-    }
-
-    stopSnap();
-    track.classList.add('is-snapping');
-
-    const start = offset;
-    const distance = target - start;
-    const duration = 280;
-    const startTime = performance.now();
-
-    const tick = (now) => {
-      const t = Math.min((now - startTime) / duration, 1);
-      const eased = 1 - Math.pow(1 - t, 3);
-      offset = start + distance * eased;
-      applyTransform();
-
-      if (t < 1) {
-        snapAnimId = requestAnimationFrame(tick);
-        return;
-      }
-
-      snapAnimId = 0;
-      track.classList.remove('is-snapping');
-      offset = target;
-      repositionLoop(targetIdx);
-    };
-
-    snapAnimId = requestAnimationFrame(tick);
+    animateSnap(target, targetIdx, { fromWheel });
   };
 
   const measure = () => {
@@ -220,7 +249,7 @@ function initGalleryDragCarousel() {
         return;
       }
       offset -= velocity;
-      velocity *= 0.93;
+      velocity *= 0.945;
       applyTransform();
       momentumId = requestAnimationFrame(step);
     };
@@ -302,15 +331,21 @@ function initGalleryDragCarousel() {
 
       e.preventDefault();
       stopMomentum();
-      stopSnap();
-      offset += delta * 1.45;
+
+      if (track.classList.contains('is-snapping')) {
+        offset = readCurrentOffset();
+        track.classList.remove('is-snapping', 'is-wheel-snap');
+        applyTransform();
+      }
+
+      offset += delta * 1.25;
       applyTransform();
 
       if (wheelSnapTimer) clearTimeout(wheelSnapTimer);
       wheelSnapTimer = window.setTimeout(() => {
         wheelSnapTimer = 0;
-        snapToNearest();
-      }, 90);
+        snapToNearest(0, { fromWheel: true });
+      }, 175);
     },
     { passive: false }
   );

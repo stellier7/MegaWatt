@@ -1037,10 +1037,27 @@ footer {
 .reveal {
   opacity: 0;
   transform: translateY(24px);
-  transition: opacity .7s ease, transform .7s ease;
+  transition: opacity .75s cubic-bezier(.2, .8, .2, 1), transform .75s cubic-bezier(.2, .8, .2, 1);
+}
+
+.reveal-from-left {
+  transform: translateX(-52px);
+}
+
+.reveal-from-right {
+  transform: translateX(52px);
+  transition-delay: .14s;
 }
 
 .reveal.in {
   opacity: 1;
-  transform: translateY(0);
+  transform: translate(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal-from-left,
+  .reveal-from-right {
+    transform: none;
+    transition-delay: 0s;
+  }
 }

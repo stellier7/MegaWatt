@@ -35,6 +35,11 @@ function setSeller(name) {
     catalogCard.href = 'productos.html' + sellerQuery(name);
   }
 
+  const featuredCatalogLink = document.getElementById('featuredCatalogLink');
+  if (featuredCatalogLink) {
+    featuredCatalogLink.href = 'productos.html' + sellerQuery(name);
+  }
+
   const footerHome = document.getElementById('footerHome');
   if (footerHome) {
     footerHome.href = 'index.html' + sellerQuery(name);

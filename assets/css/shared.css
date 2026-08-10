@@ -309,6 +309,8 @@ a { color: inherit; }
 
 /* ---------- section shell ---------- */
 .section { padding: 90px 0; }
+.featured-section { padding: 56px 0 64px; }
+.featured-section .section-head { margin-bottom: 32px; }
 .section.alt {
   background: var(--charcoal-soft);
   border-top: 1px solid var(--line);
@@ -462,6 +464,89 @@ a { color: inherit; }
 .product-card:hover {
   transform: translateY(-4px);
   border-color: rgba(232, 97, 31, 0.5);
+}
+
+/* ---------- featured carousel ---------- */
+.featured-carousel {
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent);
+  margin: 0 -8px;
+  padding: 4px 0 8px;
+}
+
+.featured-track {
+  display: flex;
+  gap: 18px;
+  width: max-content;
+  animation: featured-marquee 50s linear infinite;
+}
+
+.featured-carousel:hover .featured-track,
+.featured-carousel:focus-within .featured-track {
+  animation-play-state: paused;
+}
+
+.featured-track .product-card {
+  flex: 0 0 min(240px, 72vw);
+}
+
+.featured-track .p-photo {
+  aspect-ratio: auto;
+  height: 200px;
+}
+
+.featured-track .p-photo img,
+.featured-track .p-photo video {
+  height: 100%;
+}
+
+.featured-cta {
+  text-align: center;
+  margin: 28px 0 0;
+}
+
+.featured-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--orange);
+  text-decoration: none;
+  transition: color 0.2s ease, gap 0.2s ease;
+}
+
+.featured-link:hover {
+  color: var(--amber);
+  gap: 10px;
+}
+
+@keyframes featured-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .featured-track {
+    animation: none;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 8px;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+
+  .featured-carousel {
+    overflow-x: auto;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+
+  .featured-track .product-card {
+    scroll-snap-align: start;
+  }
 }
 
 .p-photo {

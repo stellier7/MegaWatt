@@ -259,6 +259,40 @@ function photoClass(product) {
   return 'p-photo';
 }
 
+const featuredProductNames = [
+  'Spot redondo 12W',
+  'Spot cuadrado color 6+3W',
+  'Foco LED 9W',
+  'Foco LED 18W',
+  'Foco LED 50W',
+  'Bombillo LED de Emergencia',
+  'LED Street Light 150W',
+  'LED Street Light 200W',
+];
+
+function getFeaturedProducts() {
+  return featuredProductNames
+    .map((name) => products.find((p) => p.nombre === name))
+    .filter(Boolean);
+}
+
+function productCardHtml(p) {
+  return `
+    <div class="product-card">
+      <div class="${photoClass(p)}">${productPhotoHtml(p)}</div>
+      <div class="p-body">
+        <div class="p-cat">${p.subcategoria}</div>
+        <h4>${p.nombre}</h4>
+        <div class="p-specs">
+          <span>${p.temp}</span>
+          ${p.forma !== '—' ? `<span>${p.forma}</span>` : ''}
+          <span>${p.aplicacion === 'Pendiente' ? 'Aplicación pendiente' : p.aplicacion}</span>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
 function renderCatalogTabs() {
   const el = document.getElementById('catTabs');
   if (!el) return;
@@ -312,24 +346,22 @@ function renderProductGrid() {
     emptyNote.style.display = filtered.length ? 'none' : 'block';
   }
 
-  grid.innerHTML = filtered
-    .map(
-      (p) => `
-    <div class="product-card">
-      <div class="${photoClass(p)}">${productPhotoHtml(p)}</div>
-      <div class="p-body">
-        <div class="p-cat">${p.subcategoria}</div>
-        <h4>${p.nombre}</h4>
-        <div class="p-specs">
-          <span>${p.temp}</span>
-          ${p.forma !== '—' ? `<span>${p.forma}</span>` : ''}
-          <span>${p.aplicacion === 'Pendiente' ? 'Aplicación pendiente' : p.aplicacion}</span>
-        </div>
-      </div>
-    </div>
-  `
-    )
-    .join('');
+  grid.innerHTML = filtered.map(productCardHtml).join('');
+}
+
+function renderFeaturedCarousel() {
+  const track = document.getElementById('featuredTrack');
+  if (!track) return;
+
+  const featured = getFeaturedProducts();
+  if (!featured.length) return;
+
+  const cards = featured.map(productCardHtml).join('');
+  track.innerHTML = cards + cards;
+}
+
+function initFeatured() {
+  renderFeaturedCarousel();
 }
 
 function initCatalog() {

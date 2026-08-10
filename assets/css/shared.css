@@ -116,10 +116,10 @@ a { color: inherit; }
 .hero-mark {
   position: relative;
   z-index: 2;
-  width: 132px;
-  height: 132px;
+  width: min(220px, 56vw);
+  aspect-ratio: 4 / 3;
   background: var(--orange);
-  border-radius: 28px;
+  border-radius: 22px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -127,9 +127,15 @@ a { color: inherit; }
   margin-bottom: 38px;
   transform: translateY(0);
   transition: transform .2s ease-out;
+  overflow: hidden;
 }
 
-.hero-mark svg { width: 64%; height: 64%; }
+.hero-mark img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
 
 .hero h1 {
   position: relative;
@@ -685,6 +691,14 @@ footer {
 }
 
 .foot-mark .sq svg { width: 60%; }
+
+.foot-mark .foot-logo {
+  width: 48px;
+  height: 36px;
+  object-fit: cover;
+  border-radius: 8px;
+  display: block;
+}
 .foot-mark b {
   font-family: 'Archivo Black', sans-serif;
   font-size: 15px;

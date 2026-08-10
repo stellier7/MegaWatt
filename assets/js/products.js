@@ -1,5 +1,7 @@
 // aplicacion: 'Interior' | 'Exterior' | 'Emergencia' | 'Pendiente'
-// Optional `image` path (e.g. 'assets/images/foco-6w.jpg') shows photo when set.
+// Set `image` to an assets/images path; empty string keeps “Foto pendiente”.
+const img = (file) => (file ? `assets/images/${file}` : '');
+
 const products = [
   ...[6, 7, 9, 12, 15, 18, 20].map((w) => ({
     nombre: `Foco LED ${w}W`,
@@ -10,7 +12,7 @@ const products = [
     temp: '6500K',
     forma: '—',
     aplicacion: 'Interior',
-    image: '',
+    image: img(w === 6 ? '' : `foco-${w}W.jpeg`),
   })),
   {
     nombre: 'Spot redondo 3W',
@@ -21,7 +23,7 @@ const products = [
     temp: '6500K',
     forma: 'Redondo',
     aplicacion: 'Interior',
-    image: '',
+    image: img('spot-redondo-3W.jpeg'),
   },
   {
     nombre: 'Spot redondo 6W',
@@ -32,10 +34,21 @@ const products = [
     temp: '6500K',
     forma: 'Redondo',
     aplicacion: 'Interior',
-    image: '',
+    image: img('spot-redondo-6W.jpeg'),
   },
   {
-    nombre: 'Spot redondo 6+3W',
+    nombre: 'Spot redondo 12W',
+    categoria: 'Iluminación Interior',
+    subcategoria: 'Spots LED · Redondos',
+    tipo: 'Spot LED',
+    potencia: '12W',
+    temp: '6500K',
+    forma: 'Redondo',
+    aplicacion: 'Interior',
+    image: img('spot-redondo-12W.jpeg'),
+  },
+  {
+    nombre: 'Spot redondo color 6+3W',
     categoria: 'Iluminación Interior',
     subcategoria: 'Spots LED · Redondos',
     tipo: 'Spot LED',
@@ -43,7 +56,7 @@ const products = [
     temp: '6500K',
     forma: 'Redondo',
     aplicacion: 'Interior',
-    image: '',
+    image: img('spot-redondo-color-6+3W.jpeg'),
   },
   {
     nombre: 'Spot redondo color 12+4W',
@@ -54,7 +67,7 @@ const products = [
     temp: '6500K',
     forma: 'Redondo',
     aplicacion: 'Interior',
-    image: '',
+    image: img('spot-redondo-color-12+4W.jpeg'),
   },
   {
     nombre: 'Spot cuadrado 3W',
@@ -65,10 +78,10 @@ const products = [
     temp: '6500K',
     forma: 'Cuadrado',
     aplicacion: 'Interior',
-    image: '',
+    image: img('spot-cuadrado-3W.jpeg'),
   },
   {
-    nombre: 'Spot cuadrado 3+3W',
+    nombre: 'Spot cuadrado color 3+3W',
     categoria: 'Iluminación Interior',
     subcategoria: 'Spots LED · Cuadrados',
     tipo: 'Spot LED',
@@ -76,7 +89,7 @@ const products = [
     temp: '6500K',
     forma: 'Cuadrado',
     aplicacion: 'Interior',
-    image: '',
+    image: img('spot-cuadrado-color-3+3W.jpeg'),
   },
   {
     nombre: 'Spot cuadrado 6W',
@@ -87,7 +100,7 @@ const products = [
     temp: '6500K',
     forma: 'Cuadrado',
     aplicacion: 'Interior',
-    image: '',
+    image: img('spot-cuadrado-6W.jpeg'),
   },
   {
     nombre: 'Spot cuadrado color 6+3W',
@@ -98,7 +111,7 @@ const products = [
     temp: '6500K',
     forma: 'Cuadrado',
     aplicacion: 'Interior',
-    image: '',
+    image: img('spot-cuadrado-color-6+3W.jpeg'),
   },
   {
     nombre: 'Spot cuadrado 12W',
@@ -109,7 +122,7 @@ const products = [
     temp: '6500K',
     forma: 'Cuadrado',
     aplicacion: 'Interior',
-    image: '',
+    image: img('spot-cuadrado-12W.jpeg'),
   },
   {
     nombre: 'Spot cuadrado color 12+4W',
@@ -120,7 +133,7 @@ const products = [
     temp: '6500K',
     forma: 'Cuadrado',
     aplicacion: 'Interior',
-    image: '',
+    image: img('spot-cuadrado-color-12+4W.jpeg'),
   },
   {
     nombre: 'Spot cuadrado 18W',
@@ -131,7 +144,7 @@ const products = [
     temp: '6500K',
     forma: 'Cuadrado',
     aplicacion: 'Interior',
-    image: '',
+    image: img('spot-cuadrado-18W.jpeg'),
   },
   {
     nombre: 'Spot cuadrado color 18+6W',
@@ -142,7 +155,7 @@ const products = [
     temp: '6500K',
     forma: 'Cuadrado',
     aplicacion: 'Interior',
-    image: '',
+    image: img('spot-cuadrado-color-18+6W.jpeg'),
   },
   ...[30, 40, 50, 60, 70, 80, 100].map((w) => ({
     nombre: `Foco LED ${w}W`,
@@ -153,7 +166,7 @@ const products = [
     temp: '6500K',
     forma: '—',
     aplicacion: 'Pendiente',
-    image: '',
+    image: img(`foco-${w}W.jpeg`),
   })),
   {
     nombre: 'LED Street Light 150W',

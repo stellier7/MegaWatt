@@ -1,22 +1,22 @@
 const galleryItems = [
   {
     type: 'image',
-    src: 'assets/images/gallery/gallery-01.jpeg',
+    src: 'assets/images/gallery/gallery1.jpeg',
     caption: 'Instalación MegaWatt',
   },
   {
     type: 'video',
-    src: 'assets/images/gallery/gallery-01.mp4',
+    src: 'assets/images/gallery/gallery-video1.mov',
     caption: 'Producto en acción',
   },
   {
     type: 'image',
-    src: 'assets/images/gallery/gallery-02.jpeg',
+    src: 'assets/images/gallery/gallery2.jpeg',
     caption: 'Iluminación LED',
   },
   {
     type: 'video',
-    src: 'assets/images/gallery/gallery-02.mp4',
+    src: 'assets/images/gallery/gallery-video2.mov',
     caption: 'Demostración',
   },
 ];

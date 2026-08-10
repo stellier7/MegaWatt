@@ -474,7 +474,12 @@ a { color: inherit; }
   overflow: hidden;
 }
 
-.p-photo img {
+.p-photo.ratio-9-16 {
+  aspect-ratio: 9 / 16;
+}
+
+.p-photo img,
+.p-photo video {
   width: 100%;
   height: 100%;
   object-fit: cover;

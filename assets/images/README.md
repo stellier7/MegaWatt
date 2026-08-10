@@ -1,6 +1,4 @@
-# Product photos
-
-Drop product images here, then set the matching `image` path on each product in `assets/js/products.js`.
+# Product photos / media
 
 ## Naming
 
@@ -10,16 +8,13 @@ spot-redondo-{watts}W.jpeg
 spot-redondo-color-{watts}W.jpeg
 spot-cuadrado-{watts}W.jpeg
 spot-cuadrado-color-{watts}W.jpeg
-street-{watts}W.jpeg
-emergencia.jpeg
+street-{watts}W.jpeg          ← 9:16 on the site
+emergencia.mov or .mp4
 logo.jpeg
 ```
 
-## Still missing
+Street lights use a **9:16** card frame. Other products use **4:5**.
 
-- `foco-6W.jpeg`
-- `street-150W.jpeg`
-- `street-200W.jpeg`
-- `emergencia.jpeg`
+## Note on video
 
-Until a path is set, the catalog shows a “Foto pendiente” placeholder.
+`.mov` works best in Safari. For Chrome/Android, prefer `emergencia.mp4`.

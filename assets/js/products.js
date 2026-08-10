@@ -1,9 +1,10 @@
 // aplicacion: 'Interior' | 'Exterior' | 'Emergencia' | 'Pendiente'
 // Set `image` to an assets/images path; empty string keeps “Foto pendiente”.
+// Optional `ratio`: '9/16' for tall media (street lights). Default card ratio is 4/5.
 const img = (file) => (file ? `assets/images/${file}` : '');
 
 const products = [
-  ...[6, 7, 9, 12, 15, 18, 20].map((w) => ({
+  ...[7, 9, 12, 15, 18, 20].map((w) => ({
     nombre: `Foco LED ${w}W`,
     categoria: 'Iluminación Interior',
     subcategoria: 'Focos LED',
@@ -12,7 +13,7 @@ const products = [
     temp: '6500K',
     forma: '—',
     aplicacion: 'Interior',
-    image: img(w === 6 ? '' : `foco-${w}W.jpeg`),
+    image: img(`foco-${w}W.jpeg`),
   })),
   {
     nombre: 'Spot redondo 3W',
@@ -177,7 +178,8 @@ const products = [
     temp: '6500K',
     forma: '—',
     aplicacion: 'Exterior',
-    image: '',
+    ratio: '9/16',
+    image: img('street-150W.jpeg'),
   },
   {
     nombre: 'LED Street Light 200W',
@@ -188,7 +190,8 @@ const products = [
     temp: '6500K',
     forma: '—',
     aplicacion: 'Exterior',
-    image: '',
+    ratio: '9/16',
+    image: img('street-200W.jpeg'),
   },
   {
     nombre: 'Bombillo LED de Emergencia',
@@ -199,7 +202,7 @@ const products = [
     temp: '6500K',
     forma: '—',
     aplicacion: 'Emergencia',
-    image: '',
+    image: img('emergencia.mov'),
   },
 ];
 
@@ -225,11 +228,22 @@ const catalogState = {
   app: 'Todas',
 };
 
+function isVideoPath(path) {
+  return /\.(mp4|webm|mov)$/i.test(path || '');
+}
+
 function productPhotoHtml(product) {
-  if (product.image) {
-    return `<img src="${product.image}" alt="${product.nombre}" loading="lazy">`;
+  if (!product.image) {
+    return '<span>Foto pendiente</span>';
   }
-  return '<span>Foto pendiente</span>';
+  if (isVideoPath(product.image)) {
+    return `<video src="${product.image}" muted playsinline loop autoplay preload="metadata" aria-label="${product.nombre}"></video>`;
+  }
+  return `<img src="${product.image}" alt="${product.nombre}" loading="lazy">`;
+}
+
+function photoClass(product) {
+  return product.ratio === '9/16' ? 'p-photo ratio-9-16' : 'p-photo';
 }
 
 function renderCatalogTabs() {
@@ -289,7 +303,7 @@ function renderProductGrid() {
     .map(
       (p) => `
     <div class="product-card">
-      <div class="p-photo">${productPhotoHtml(p)}</div>
+      <div class="${photoClass(p)}">${productPhotoHtml(p)}</div>
       <div class="p-body">
         <div class="p-cat">${p.subcategoria}</div>
         <h4>${p.nombre}</h4>

@@ -1,7 +1,7 @@
 // aplicacion: 'Interior' | 'Exterior' | 'Emergencia' | 'Pendiente'
 // Set `image` to an assets/images path; empty string keeps “Foto pendiente”.
 // Optional `ratio`: '9/16' for tall media (street lights). Default card ratio is 1/1.
-// Display order: spots → focos → emergencia → street
+// Display order: spots → focos → street → emergencia
 const img = (file) => (file ? `assets/images/${file}` : '');
 
 const products = [
@@ -158,7 +158,7 @@ const products = [
     tipo: 'Foco LED',
     potencia: w + 'W',
     temp: '6500K',
-    forma: '—',
+    forma: 'Focos',
     aplicacion: 'Interior',
     // 7–18W packaging shots are 9:16; 20W uses 5:7
     ...( [7, 9, 12, 15, 18].includes(w) ? { ratio: '9/16' } : { ratio: '5/7' } ),
@@ -171,24 +171,11 @@ const products = [
     tipo: 'Foco LED',
     potencia: w + 'W',
     temp: '6500K',
-    forma: '—',
+    forma: 'Focos',
     aplicacion: 'Pendiente',
     ratio: '5/7',
     image: img(`foco-${w}W.jpeg`),
   })),
-
-  // --- Emergencia ---
-  {
-    nombre: 'Bombillo LED de Emergencia',
-    categoria: 'Iluminación de Emergencia',
-    subcategoria: 'Bombillos LED de Emergencia',
-    tipo: 'Bombillo LED de Emergencia',
-    potencia: '—',
-    temp: '6500K',
-    forma: '—',
-    aplicacion: 'Emergencia',
-    image: img('emergencia.mov'),
-  },
 
   // --- Street ---
   {
@@ -215,6 +202,19 @@ const products = [
     ratio: '9/16',
     image: img('street-200W.jpeg'),
   },
+
+  // --- Emergencia ---
+  {
+    nombre: 'Bombillo LED de Emergencia',
+    categoria: 'Iluminación de Emergencia',
+    subcategoria: 'Bombillos LED de Emergencia',
+    tipo: 'Bombillo LED de Emergencia',
+    potencia: '—',
+    temp: '6500K',
+    forma: '—',
+    aplicacion: 'Emergencia',
+    image: img('emergencia.mov'),
+  },
 ];
 
 const categories = [
@@ -229,7 +229,7 @@ const wattOptions = [
   ...Array.from(new Set(products.map((p) => p.potencia))).filter((p) => p !== '—'),
 ];
 
-const shapeOptions = ['Todas', 'Redondo', 'Cuadrado'];
+const shapeOptions = ['Todas', 'Redondo', 'Cuadrado', 'Focos'];
 const appOptions = ['Todas', 'Interior', 'Exterior', 'Emergencia', 'Pendiente'];
 
 const catalogState = {
@@ -328,22 +328,16 @@ function renderCatalogTabs() {
   });
 }
 
-function renderChipRow(containerId, options, key) {
-  const el = document.getElementById(containerId);
+function renderSelectFilter(selectId, options, key) {
+  const el = document.getElementById(selectId);
   if (!el) return;
   el.innerHTML = options
-    .map(
-      (o) =>
-        `<button type="button" class="chip ${catalogState[key] === o ? 'active' : ''}" data-v="${o}">${o}</button>`
-    )
+    .map((o) => `<option value="${o}"${catalogState[key] === o ? ' selected' : ''}>${o}</option>`)
     .join('');
-  el.querySelectorAll('.chip').forEach((b) => {
-    b.addEventListener('click', () => {
-      catalogState[key] = b.dataset.v;
-      renderChipRow(containerId, options, key);
-      renderProductGrid();
-    });
-  });
+  el.onchange = () => {
+    catalogState[key] = el.value;
+    renderProductGrid();
+  };
 }
 
 function renderProductGrid() {
@@ -383,8 +377,8 @@ function initFeatured() {
 
 function initCatalog() {
   renderCatalogTabs();
-  renderChipRow('wattChips', wattOptions, 'watt');
-  renderChipRow('shapeChips', shapeOptions, 'shape');
-  renderChipRow('appChips', appOptions, 'app');
+  renderSelectFilter('wattSelect', wattOptions, 'watt');
+  renderSelectFilter('shapeSelect', shapeOptions, 'shape');
+  renderSelectFilter('appSelect', appOptions, 'app');
   renderProductGrid();
 }

@@ -293,6 +293,23 @@ function productCardHtml(p) {
   `;
 }
 
+function featuredCardHtml(p) {
+  return `
+    <div class="product-card featured-card">
+      <div class="p-photo featured-photo">${productPhotoHtml(p)}</div>
+      <div class="p-body">
+        <div class="p-cat">${p.subcategoria}</div>
+        <h4>${p.nombre}</h4>
+        <div class="p-specs">
+          <span>${p.temp}</span>
+          ${p.forma !== '—' ? `<span>${p.forma}</span>` : ''}
+          <span>${p.aplicacion === 'Pendiente' ? 'Aplicación pendiente' : p.aplicacion}</span>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
 function renderCatalogTabs() {
   const el = document.getElementById('catTabs');
   if (!el) return;
@@ -356,7 +373,7 @@ function renderFeaturedCarousel() {
   const featured = getFeaturedProducts();
   if (!featured.length) return;
 
-  const cards = featured.map(productCardHtml).join('');
+  const cards = featured.map(featuredCardHtml).join('');
   track.innerHTML = cards + cards;
 }
 

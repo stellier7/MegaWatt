@@ -841,10 +841,6 @@ body.gallery-lightbox-open {
   margin: 0;
 }
 
-.gallery-lightbox-stage {
-  transition: opacity 0.25s ease, transform 0.25s ease;
-}
-
 .gallery-lightbox-stage.slide-from-left {
   opacity: 0.7;
   transform: translateX(18px);

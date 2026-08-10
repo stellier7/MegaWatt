@@ -154,16 +154,7 @@ a { color: inherit; }
   color: #1b0e05;
 }
 
-.nfc-card .kicker {
-  font-size: 12px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  font-weight: 700;
-  opacity: .75;
-}
-
-.nfc-card.card-reseller .kicker { opacity: .7; }
-.nfc-card h3 { font-size: 34px; margin: 10px 0 0; line-height: 0.95; }
+.nfc-card h3 { font-size: 34px; margin: 0; line-height: 0.95; }
 
 .nfc-card p {
   font-family: 'Manrope', sans-serif;

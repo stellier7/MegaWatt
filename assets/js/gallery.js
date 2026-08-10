@@ -48,7 +48,74 @@ function gallerySlideHtml(item, index) {
 function renderGalleryCarousel() {
   const track = document.getElementById('galleryTrack');
   if (!track || !galleryItems.length) return;
-  track.innerHTML = galleryItems.map(gallerySlideHtml).join('');
+  const slides = galleryItems.map(gallerySlideHtml).join('');
+  track.innerHTML = slides + slides + slides;
+}
+
+function initGalleryInfiniteScroll() {
+  const carousel = document.getElementById('galleryCarousel');
+  const track = document.getElementById('galleryTrack');
+  if (!carousel || !track || galleryItems.length < 2) return;
+
+  let setWidth = 0;
+  let isJumping = false;
+
+  const measure = () => {
+    setWidth = track.scrollWidth / 3;
+  };
+
+  const jumpToMiddle = () => {
+    measure();
+    if (setWidth > 0) {
+      isJumping = true;
+      carousel.scrollLeft = setWidth;
+      isJumping = false;
+    }
+  };
+
+  const normalizeScroll = () => {
+    if (isJumping || !setWidth) return;
+
+    const x = carousel.scrollLeft;
+    const edge = Math.max(8, carousel.clientWidth * 0.02);
+
+    if (x >= setWidth * 2 - edge) {
+      isJumping = true;
+      carousel.scrollLeft = x - setWidth;
+      isJumping = false;
+    } else if (x <= edge) {
+      isJumping = true;
+      carousel.scrollLeft = x + setWidth;
+      isJumping = false;
+    }
+  };
+
+  jumpToMiddle();
+
+  if ('ResizeObserver' in window) {
+    const ro = new ResizeObserver(() => {
+      const ratio = setWidth > 0 ? carousel.scrollLeft / setWidth : 1;
+      measure();
+      if (setWidth > 0) {
+        isJumping = true;
+        carousel.scrollLeft = setWidth * Math.min(Math.max(ratio, 1), 2);
+        isJumping = false;
+      }
+    });
+    ro.observe(track);
+  }
+
+  window.addEventListener(
+    'orientationchange',
+    () => {
+      window.setTimeout(jumpToMiddle, 250);
+    },
+    { passive: true }
+  );
+
+  carousel.addEventListener('scroll', normalizeScroll, { passive: true });
+
+  return normalizeScroll;
 }
 
 function ensureGalleryLightbox() {

@@ -82,6 +82,20 @@
         <a href="productos.html" id="featuredCatalogLink" class="featured-link">Ver catálogo completo →</a>
       </p>
     </div>
+
+    <div class="gallery-divider reveal" aria-hidden="true"></div>
+
+    <div class="container">
+      <div class="section-head gallery-head reveal">
+        <div class="eyebrow">En acción</div>
+        <h2>Galería</h2>
+        <p>Instalaciones y productos MegaWatt en uso real.</p>
+      </div>
+    </div>
+
+    <div class="gallery-carousel reveal" id="galleryCarousel" aria-label="Carrusel de galería" tabindex="0">
+      <div class="gallery-track" id="galleryTrack"></div>
+    </div>
   </section>
 
   <section class="section" id="distribuidor">
@@ -157,10 +171,12 @@
 
   <script src="assets/js/seller.js"></script>
   <script src="assets/js/products.js"></script>
+  <script src="assets/js/gallery.js"></script>
   <script src="assets/js/landing.js"></script>
   <script>
     initSeller();
     initFeatured();
+    initGallery();
     initLanding();
   </script>
 </body>

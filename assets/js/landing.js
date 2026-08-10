@@ -57,20 +57,20 @@ function initReveal() {
   document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
 }
 
-function initFeaturedCarousel() {
-  const track = document.getElementById('featuredTrack');
-  const carousel = document.getElementById('featuredCarousel');
+function initAutoCarousel(track, carousel, options = {}) {
   if (!track || !carousel) return;
+
+  const speed = options.speed ?? 0.55;
+  const staticClass = options.staticClass ?? 'auto-carousel--static';
 
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (reducedMotion) {
-    carousel.classList.add('featured-carousel--static');
+    carousel.classList.add(staticClass);
     return;
   }
 
   let offset = 0;
   let paused = false;
-  const speed = 0.55;
   let loopWidth = 0;
 
   const measure = () => {
@@ -136,10 +136,27 @@ function initFeaturedCarousel() {
   });
 }
 
+function initFeaturedCarousel() {
+  initAutoCarousel(
+    document.getElementById('featuredTrack'),
+    document.getElementById('featuredCarousel'),
+    { speed: 0.55, staticClass: 'featured-carousel--static' }
+  );
+}
+
+function initGalleryCarousel() {
+  initAutoCarousel(
+    document.getElementById('galleryTrack'),
+    document.getElementById('galleryCarousel'),
+    { speed: 0.4, staticClass: 'gallery-carousel--static' }
+  );
+}
+
 function initLanding() {
   initHeroParallax();
   initBoltField();
   initCardTilt();
   initReveal();
   initFeaturedCarousel();
+  initGalleryCarousel();
 }

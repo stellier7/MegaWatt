@@ -581,6 +581,105 @@ a { color: inherit; }
   }
 }
 
+/* ---------- gallery carousel ---------- */
+.gallery-divider {
+  height: 1px;
+  max-width: 720px;
+  margin: 40px auto 36px;
+  background: linear-gradient(90deg, transparent, var(--line), transparent);
+}
+
+.gallery-head {
+  margin-bottom: 28px;
+}
+
+.gallery-carousel {
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent);
+  padding: 4px 0 8px;
+}
+
+.gallery-track {
+  display: flex;
+  align-items: stretch;
+  gap: 20px;
+  width: max-content;
+  will-change: transform;
+  padding: 0 24px;
+}
+
+.gallery-slide {
+  flex: 0 0 min(340px, 82vw);
+  margin: 0;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: var(--charcoal-soft);
+  transition: border-color 0.25s ease, transform 0.25s ease;
+}
+
+.gallery-slide:hover {
+  border-color: rgba(232, 97, 31, 0.45);
+  transform: translateY(-3px);
+}
+
+.gallery-media {
+  aspect-ratio: 16 / 9;
+  background: linear-gradient(180deg, #1c1a18 0%, #121110 100%);
+  overflow: hidden;
+}
+
+.gallery-media img,
+.gallery-media video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+.gallery-caption {
+  padding: 12px 14px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--steel-light);
+  letter-spacing: 0.02em;
+}
+
+.gallery-carousel--static {
+  overflow-x: auto;
+  -webkit-mask-image: none;
+  mask-image: none;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: thin;
+}
+
+.gallery-carousel--static .gallery-track {
+  transform: none !important;
+}
+
+.gallery-carousel--static .gallery-slide {
+  scroll-snap-align: start;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gallery-carousel:not(.gallery-carousel--static) {
+    overflow-x: auto;
+    -webkit-mask-image: none;
+    mask-image: none;
+    scroll-snap-type: x mandatory;
+  }
+
+  .gallery-carousel:not(.gallery-carousel--static) .gallery-track {
+    transform: none !important;
+  }
+
+  .gallery-carousel:not(.gallery-carousel--static) .gallery-slide {
+    scroll-snap-align: start;
+  }
+}
+
 .p-photo {
   aspect-ratio: 1 / 1;
   background: repeating-linear-gradient(45deg, #1c1a18, #1c1a18 10px, #201e1b 10px, #201e1b 20px);

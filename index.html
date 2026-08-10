@@ -92,7 +92,7 @@
     <div class="container">
       <div class="section-head reveal">
         <h2>Sé distribuidor MegaWatt</h2>
-        <p>Suma la línea de iluminación MegaWatt a tu ferretería o negocio.</p>
+        <p>Suma la línea de iluminación MegaWatt a tu ferretería o negocio. Distribuidores en Centroamérica y más allá.</p>
       </div>
 
       <div class="reseller-wrap reveal">
@@ -128,9 +128,21 @@
           <label for="lead-business">Negocio / Ferretería</label>
           <input id="lead-business" type="text" placeholder="Nombre del negocio">
           <label for="lead-phone">Teléfono / WhatsApp</label>
-          <input id="lead-phone" type="tel" placeholder="+504">
-          <label for="lead-city">Ciudad</label>
-          <input id="lead-city" type="text" placeholder="Comayagua, Tegucigalpa...">
+          <div class="phone-field">
+            <div class="country-picker" id="leadCountryPicker">
+              <button type="button" class="country-picker-trigger" id="leadCountryTrigger" aria-haspopup="listbox" aria-expanded="false">
+                <span class="country-flag" aria-hidden="true">🇭🇳</span>
+                <span class="country-dial">+504</span>
+              </button>
+              <div class="country-picker-panel" id="leadCountryPanel" role="dialog" aria-label="Seleccionar país">
+                <input type="search" id="leadCountrySearch" class="country-picker-search" placeholder="Buscar país o código..." autocomplete="off" enterkeyhint="search">
+                <ul class="country-picker-list" id="leadCountryList" role="listbox"></ul>
+              </div>
+            </div>
+            <input id="lead-phone" type="tel" inputmode="tel" placeholder="9999-9999" autocomplete="tel-national">
+          </div>
+          <label for="lead-city">Ciudad y país</label>
+          <input id="lead-city" type="text" placeholder="San Salvador, El Salvador">
           <button type="button" class="submit-btn">Quiero ser distribuidor</button>
           <a class="wa-link" href="https://wa.me/50495002199" target="_blank" rel="noopener">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12c0 1.85.5 3.58 1.36 5.07L2 22l5.06-1.33A9.94 9.94 0 0 0 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2zm5.2 14.2c-.22.62-1.28 1.2-1.77 1.24-.45.04-.9.23-3.03-.63-2.57-1.03-4.24-3.6-4.37-3.77-.13-.17-1.04-1.38-1.04-2.63 0-1.25.65-1.86.89-2.11.22-.24.5-.3.66-.3h.48c.15 0 .36-.03.55.42.22.53.75 1.83.82 1.96.06.13.1.28.02.45-.08.17-.13.27-.25.42-.13.15-.27.33-.38.44-.13.13-.26.27-.11.53.15.27.68 1.13 1.47 1.83 1.01.9 1.86 1.18 2.13 1.31.27.13.42.11.58-.07.15-.18.65-.76.83-1.02.17-.26.34-.22.57-.13.23.08 1.47.7 1.72.82.25.13.42.19.48.3.06.11.06.62-.16 1.24z"/></svg>
@@ -159,6 +171,7 @@
   </footer>
 
   <script src="assets/js/seller.js"></script>
+  <script src="assets/js/country-codes.js"></script>
   <script src="assets/js/contact.js"></script>
   <script src="assets/js/products.js"></script>
   <script src="assets/js/gallery.js"></script>

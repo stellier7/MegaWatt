@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MEGAWATT — Iluminación</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Barlow+Condensed:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/shared.css">
+</head>
+<body>
+
+  <div class="seller-strip">
+    <div class="container">
+      <div><span class="dot"></span>Presentado por <b id="sellerName">Equipo MegaWatt</b></div>
+      <div style="display:flex;align-items:center;gap:14px;">
+        <div id="sellerUrlHint" style="opacity:.65;">megawatt.com/vendedor/tu-nombre</div>
+        <div style="display:flex;gap:6px;">
+          <button type="button" class="seller-btn" data-seller="Jason">Jason</button>
+          <button type="button" class="seller-btn" data-seller="Marwan">Marwan</button>
+          <button type="button" class="seller-btn" data-seller="">Equipo</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="hero" id="hero">
+    <div class="bolt-field" id="boltField"></div>
+    <div class="hero-mark" id="heroMark">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z" fill="#161513"/></svg>
+    </div>
+    <h1 class="wordmark">MEGA<span class="bolt-char">⚡</span>WATT</h1>
+    <p class="tag">Iluminación LED para todo tu proyecto — del foco doméstico a la luz de calle. Un catálogo, un contacto, una sola tarjeta.</p>
+    <div class="scroll-cue"><div class="line"></div>Desliza</div>
+  </section>
+
+  <section class="stack-section">
+    <div class="container">
+      <div class="stack-intro reveal">
+        <div class="eyebrow">La tarjeta NFC</div>
+        <h2>Dos toques, toda la propuesta</h2>
+      </div>
+      <div class="cards-wrap reveal">
+        <a class="nfc-card card-products" id="catalogCard" href="productos.html">
+          <svg class="ghost-bolt" viewBox="0 0 24 24" fill="var(--orange)"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z"/></svg>
+          <div>
+            <div class="kicker">Tarjeta 01</div>
+            <h3>Catálogo de<br>Productos</h3>
+            <p>Focos, spots, iluminación exterior y de emergencia — con potencia, forma y aplicación de cada línea.</p>
+          </div>
+          <div class="cta-row"><span>Ver catálogo</span><div class="arrow">→</div></div>
+        </a>
+        <button type="button" class="nfc-card card-reseller" onclick="scrollToSection('distribuidor')">
+          <svg class="ghost-bolt" viewBox="0 0 24 24" fill="#1b0e05"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z"/></svg>
+          <div>
+            <div class="kicker">Tarjeta 02</div>
+            <h3>Sé<br>Distribuidor</h3>
+            <p>Lleva la línea MegaWatt a tu ferretería o negocio. Condiciones, pedido mínimo y contacto directo.</p>
+          </div>
+          <div class="cta-row"><span>Quiero distribuir</span><div class="arrow">→</div></div>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <section class="section alt" id="catalogo">
+    <div class="container">
+      <div class="section-head reveal">
+        <div class="eyebrow">Tarjeta 01</div>
+        <h2>Catálogo de productos</h2>
+        <p>Filtra por tipo de espacio, potencia o forma. Las fotos reales se irán agregando — por ahora, cada espacio pendiente está marcado.</p>
+      </div>
+
+      <div class="cat-tabs reveal" id="catTabs"></div>
+
+      <div class="filters reveal">
+        <div class="filter-group">
+          <div class="fg-label">Potencia</div>
+          <div class="chip-row" id="wattChips"></div>
+        </div>
+        <div class="filter-group">
+          <div class="fg-label">Forma</div>
+          <div class="chip-row" id="shapeChips"></div>
+        </div>
+        <div class="filter-group">
+          <div class="fg-label">Aplicación</div>
+          <div class="chip-row" id="appChips"></div>
+        </div>
+      </div>
+
+      <div class="grid reveal" id="productGrid"></div>
+      <div class="empty-note" id="emptyNote" style="display:none;">No hay productos con esos filtros todavía.</div>
+    </div>
+  </section>
+
+  <section class="section" id="distribuidor">
+    <div class="container">
+      <div class="section-head reveal">
+        <div class="eyebrow">Tarjeta 02</div>
+        <h2>Sé distribuidor MegaWatt</h2>
+        <p>Suma la línea de iluminación MegaWatt a tu ferretería o negocio.</p>
+      </div>
+
+      <div class="reseller-wrap reveal">
+        <div>
+          <div class="benefit">
+            <div class="num">01</div>
+            <div>
+              <h4>Catálogo completo, un solo pedido</h4>
+              <p>Interior, exterior y emergencia bajo una misma línea — sin manejar varios proveedores.</p>
+            </div>
+          </div>
+          <div class="benefit">
+            <div class="num">02</div>
+            <div>
+              <h4>Material de venta listo</h4>
+              <p>Fotos, fichas y esta misma página, con tu nombre y contacto, para mostrar a tus clientes.</p>
+            </div>
+          </div>
+          <div class="benefit">
+            <div class="num">03</div>
+            <div>
+              <h4>Acompañamiento directo</h4>
+              <p>Un contacto MegaWatt para resolver pedidos, reposición y garantías. <span style="opacity:.6;">(Detalle a confirmar)</span></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="lead-form">
+          <h3>Cuéntanos de tu negocio</h3>
+          <div class="sub">Te contactamos en menos de 24 horas.</div>
+          <label for="lead-name">Nombre completo</label>
+          <input id="lead-name" type="text" placeholder="Tu nombre">
+          <label for="lead-business">Negocio / Ferretería</label>
+          <input id="lead-business" type="text" placeholder="Nombre del negocio">
+          <label for="lead-phone">Teléfono / WhatsApp</label>
+          <input id="lead-phone" type="tel" placeholder="+504">
+          <label for="lead-city">Ciudad</label>
+          <input id="lead-city" type="text" placeholder="Comayagua, Tegucigalpa...">
+          <button type="button" class="submit-btn" onclick="alert('Formulario de muestra — se conectará a WhatsApp o correo en la versión final.')">Quiero ser distribuidor</button>
+          <a class="wa-link" href="#" onclick="return false;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12c0 1.85.5 3.58 1.36 5.07L2 22l5.06-1.33A9.94 9.94 0 0 0 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2zm5.2 14.2c-.22.62-1.28 1.2-1.77 1.24-.45.04-.9.23-3.03-.63-2.57-1.03-4.24-3.6-4.37-3.77-.13-.17-1.04-1.38-1.04-2.63 0-1.25.65-1.86.89-2.11.22-.24.5-.3.66-.3h.48c.15 0 .36-.03.55.42.22.53.75 1.83.82 1.96.06.13.1.28.02.45-.08.17-.13.27-.25.42-.13.15-.27.33-.38.44-.13.13-.26.27-.11.53.15.27.68 1.13 1.47 1.83 1.01.9 1.86 1.18 2.13 1.31.27.13.42.11.58-.07.15-.18.65-.76.83-1.02.17-.26.34-.22.57-.13.23.08 1.47.7 1.72.82.25.13.42.19.48.3.06.11.06.62-.16 1.24z"/></svg>
+            Escribir por WhatsApp
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <div class="foot-row">
+        <div class="foot-mark">
+          <div class="sq"><svg viewBox="0 0 24 24" fill="none"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z" fill="#161513"/></svg></div>
+          <b>MEGAWATT</b>
+        </div>
+        <div class="brand-links">
+          <a href="#" onclick="return false;">Zafiro</a>
+          <a href="#" onclick="return false;">Búfalo</a>
+          <a href="#" onclick="return false;">Ferretería El Jordán</a>
+        </div>
+      </div>
+      <div class="foot-fine">Comayagua, Honduras — Otras marcas del mismo grupo, enlaces de muestra.</div>
+    </div>
+  </footer>
+
+  <script src="assets/js/seller.js"></script>
+  <script src="assets/js/products.js"></script>
+  <script src="assets/js/landing.js"></script>
+  <script>
+    initSeller();
+    initCatalog();
+    initLanding();
+  </script>
+</body>
+</html>

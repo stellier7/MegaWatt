@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Catálogo — MEGAWATT</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Barlow+Condensed:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/shared.css">
+</head>
+<body class="page-catalog">
+
+  <div class="seller-strip">
+    <div class="container">
+      <div><span class="dot"></span>Presentado por <b id="sellerName">Equipo MegaWatt</b></div>
+      <div style="display:flex;align-items:center;gap:14px;">
+        <div id="sellerUrlHint" style="opacity:.65;">megawatt.com/vendedor/tu-nombre</div>
+        <div style="display:flex;gap:6px;">
+          <button type="button" class="seller-btn" data-seller="Jason">Jason</button>
+          <button type="button" class="seller-btn" data-seller="Marwan">Marwan</button>
+          <button type="button" class="seller-btn" data-seller="">Equipo</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container page-head">
+    <a class="back-link" href="index.html" id="backLink">← Volver al inicio</a>
+    <div class="section-head">
+      <div class="eyebrow">Tarjeta 01</div>
+      <h2>Catálogo de productos</h2>
+      <p>Filtra por tipo de espacio, potencia o forma. Las fotos reales se irán agregando — por ahora, cada espacio pendiente está marcado.</p>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="cat-tabs" id="catTabs"></div>
+    <div class="filters">
+      <div class="filter-group">
+        <div class="fg-label">Potencia</div>
+        <div class="chip-row" id="wattChips"></div>
+      </div>
+      <div class="filter-group">
+        <div class="fg-label">Forma</div>
+        <div class="chip-row" id="shapeChips"></div>
+      </div>
+      <div class="filter-group">
+        <div class="fg-label">Aplicación</div>
+        <div class="chip-row" id="appChips"></div>
+      </div>
+    </div>
+    <div class="grid" id="productGrid"></div>
+    <div class="empty-note" id="emptyNote" style="display:none;">No hay productos con esos filtros todavía.</div>
+  </div>
+
+  <footer>
+    <div class="container">
+      <div class="foot-row">
+        <div class="foot-mark">
+          <div class="sq"><svg viewBox="0 0 24 24" fill="none"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z" fill="#161513"/></svg></div>
+          <b>MEGAWATT</b>
+        </div>
+        <div class="brand-links">
+          <a href="index.html" id="footerHome">Inicio</a>
+          <a href="#" onclick="return false;">Zafiro</a>
+          <a href="#" onclick="return false;">Búfalo</a>
+          <a href="#" onclick="return false;">Ferretería El Jordán</a>
+        </div>
+      </div>
+      <div class="foot-fine">Comayagua, Honduras — Otras marcas del mismo grupo, enlaces de muestra.</div>
+    </div>
+  </footer>
+
+  <script src="assets/js/seller.js"></script>
+  <script src="assets/js/products.js"></script>
+  <script>
+    initSeller();
+    initCatalog();
+  </script>
+</body>
+</html>

@@ -71,7 +71,9 @@ function initAutoCarousel(track, carousel, options = {}) {
 
   let offset = 0;
   let paused = false;
+  let inView = true;
   let loopWidth = 0;
+  let rafId = 0;
 
   const measure = () => {
     loopWidth = track.scrollWidth / 2;
@@ -85,55 +87,76 @@ function initAutoCarousel(track, carousel, options = {}) {
     paused = false;
   };
 
-  carousel.addEventListener('mouseenter', pause);
-  carousel.addEventListener('mouseleave', resume);
-  carousel.addEventListener('focusin', pause);
-  carousel.addEventListener('focusout', (e) => {
-    if (!carousel.contains(e.relatedTarget)) resume();
-  });
+  if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    carousel.addEventListener('mouseenter', pause);
+    carousel.addEventListener('mouseleave', resume);
+  }
+
+  carousel.addEventListener(
+    'touchstart',
+    () => {
+      paused = true;
+    },
+    { passive: true }
+  );
+  carousel.addEventListener(
+    'touchend',
+    () => {
+      window.setTimeout(resume, 400);
+    },
+    { passive: true }
+  );
+  carousel.addEventListener('touchcancel', resume, { passive: true });
 
   const tick = () => {
-    if (!paused && loopWidth > 0) {
+    if (!paused && inView && loopWidth > 0) {
       offset += speed;
       if (offset >= loopWidth) offset -= loopWidth;
       track.style.transform = `translate3d(-${offset}px, 0, 0)`;
     }
-    requestAnimationFrame(tick);
+    rafId = requestAnimationFrame(tick);
   };
 
   const start = () => {
     measure();
-    requestAnimationFrame(tick);
+    if (!rafId) rafId = requestAnimationFrame(tick);
   };
 
   if ('ResizeObserver' in window) {
     const ro = new ResizeObserver(measure);
     ro.observe(track);
-  } else {
-    window.addEventListener('resize', measure, { passive: true });
   }
 
-  const media = track.querySelectorAll('img, video');
-  if (!media.length) {
-    start();
-    return;
+  window.addEventListener('resize', measure, { passive: true });
+  window.addEventListener(
+    'orientationchange',
+    () => {
+      window.setTimeout(measure, 250);
+    },
+    { passive: true }
+  );
+
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver(
+      (entries) => {
+        inView = entries.some((entry) => entry.isIntersecting);
+        if (inView) measure();
+      },
+      { threshold: 0.08 }
+    );
+    io.observe(carousel);
   }
 
-  let pending = media.length;
-  const done = () => {
-    pending -= 1;
-    if (pending <= 0) start();
-  };
+  start();
 
-  media.forEach((el) => {
-    if (el.tagName === 'IMG' && el.complete) done();
-    else if (el.tagName === 'VIDEO' && el.readyState >= 2) done();
-    else {
-      el.addEventListener('load', done, { once: true });
-      el.addEventListener('loadeddata', done, { once: true });
-      el.addEventListener('error', done, { once: true });
-    }
+  track.querySelectorAll('img, video').forEach((el) => {
+    el.addEventListener('load', measure, { once: true });
+    el.addEventListener('loadeddata', measure, { once: true });
+    el.addEventListener('error', measure, { once: true });
   });
+
+  window.setTimeout(measure, 400);
+  window.setTimeout(measure, 1500);
 }
 
 function initFeaturedCarousel() {

@@ -27,10 +27,8 @@ function isGalleryVideo(path) {
 
 function galleryMediaHtml(item, { preview = true } = {}) {
   if (isGalleryVideo(item.src)) {
-    const attrs = preview
-      ? 'muted playsinline loop autoplay preload="metadata"'
-      : 'controls playsinline autoplay preload="metadata"';
-    return `<video src="${item.src}" ${attrs} aria-label="${item.caption}"></video>`;
+    const controls = preview ? '' : 'controls ';
+    return `<video src="${item.src}" ${controls}muted playsinline loop autoplay preload="metadata" aria-label="${item.caption}"></video>`;
   }
   return `<img src="${item.src}" alt="${item.caption}" loading="lazy">`;
 }
@@ -214,6 +212,8 @@ function initGalleryScroll() {
   const carousel = document.getElementById('galleryCarousel');
   if (!carousel) return;
 
+  const normalizeScroll = initGalleryInfiniteScroll();
+
   let isDown = false;
   let startX = 0;
   let scrollLeft = 0;
@@ -243,6 +243,8 @@ function initGalleryScroll() {
     if (carousel.hasPointerCapture?.(e.pointerId)) {
       carousel.releasePointerCapture(e.pointerId);
     }
+
+    normalizeScroll?.();
 
     carousel.querySelectorAll('.gallery-slide').forEach((slide) => {
       slide.dataset.dragged = moved > 8 ? 'true' : 'false';

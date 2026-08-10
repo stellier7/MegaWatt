@@ -248,7 +248,7 @@ function productPhotoHtml(product) {
     return '<span>Foto pendiente</span>';
   }
   if (isVideoPath(product.image)) {
-    return `<video src="${product.image}" muted playsinline loop autoplay preload="metadata" aria-label="${product.nombre}"></video>`;
+    return `<video src="${product.image}" muted defaultMuted playsinline loop autoplay preload="metadata" aria-label="${product.nombre}"></video>`;
   }
   return `<img src="${product.image}" alt="${product.nombre}" loading="lazy">`;
 }

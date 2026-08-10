@@ -72,10 +72,27 @@ function initGalleryDragCarousel() {
     track.style.transform = `translate3d(-${offset}px, 0, 0)`;
   };
 
-  const normalizeOffset = () => {
+  const getSlidePitch = () => {
+    const slides = track.querySelectorAll('.gallery-slide');
+    if (slides.length < 2) {
+      const slide = slides[0];
+      return slide ? slide.offsetWidth + 20 : 360;
+    }
+    return slides[1].offsetLeft - slides[0].offsetLeft;
+  };
+
+  const getSlide0BaseOffset = () => {
+    const slide = track.querySelector('.gallery-slide');
+    if (!slide) return 0;
+    return slide.offsetLeft + slide.offsetWidth / 2 - carousel.clientWidth / 2;
+  };
+
+  const repositionLoop = () => {
     if (loopWidth <= 0) return;
+    const before = offset;
     while (offset >= loopWidth) offset -= loopWidth;
     while (offset < 0) offset += loopWidth;
+    if (offset !== before) applyTransform();
   };
 
   const stopMomentum = () => {
@@ -93,43 +110,45 @@ function initGalleryDragCarousel() {
     track.classList.remove('is-snapping');
   };
 
-  const findNearestSnapOffset = () => {
-    const slides = track.querySelectorAll('.gallery-slide');
-    if (!slides.length || loopWidth <= 0) return offset;
+  const findSnapOffset = ({ releaseVelocity = 0 } = {}) => {
+    const pitch = getSlidePitch();
+    if (pitch <= 0) return offset;
 
-    const carouselCenter = carousel.clientWidth / 2;
-    let bestOffset = offset;
-    let bestDist = Infinity;
+    const base = getSlide0BaseOffset();
+    const relative = (offset - base) / pitch;
+    const threshold = 0.12;
+    const nearest = Math.round(relative);
+    const delta = relative - nearest;
 
-    slides.forEach((slide) => {
-      const baseOffset = slide.offsetLeft + slide.offsetWidth / 2 - carouselCenter;
-      [baseOffset, baseOffset + loopWidth, baseOffset - loopWidth].forEach((candidate) => {
-        const dist = Math.abs(candidate - offset);
-        if (dist < bestDist) {
-          bestDist = dist;
-          bestOffset = candidate;
-        }
-      });
-    });
+    let index = nearest;
+    if (delta > threshold || releaseVelocity < -0.08) {
+      index = nearest + 1;
+    } else if (delta < -threshold || releaseVelocity > 0.08) {
+      index = nearest - 1;
+    }
 
-    return bestOffset;
+    let target = base + index * pitch;
+    const span = loopWidth || pitch * galleryItems.length;
+
+    while (target - offset > span / 2) target -= span;
+    while (target - offset < -span / 2) target += span;
+
+    return target;
   };
 
-  const snapToNearest = () => {
+  const snapToNearest = (releaseVelocity = 0) => {
     if (loopWidth <= 0 || isDragging) return;
 
-    const target = findNearestSnapOffset();
+    const target = findSnapOffset({ releaseVelocity });
     if (Math.abs(target - offset) < 1) {
       offset = target;
-      normalizeOffset();
-      applyTransform();
+      repositionLoop();
       return;
     }
 
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       offset = target;
-      normalizeOffset();
-      applyTransform();
+      repositionLoop();
       return;
     }
 
@@ -138,7 +157,7 @@ function initGalleryDragCarousel() {
 
     const start = offset;
     const distance = target - start;
-    const duration = 380;
+    const duration = 280;
     const startTime = performance.now();
 
     const tick = (now) => {
@@ -155,8 +174,7 @@ function initGalleryDragCarousel() {
       snapAnimId = 0;
       track.classList.remove('is-snapping');
       offset = target;
-      normalizeOffset();
-      applyTransform();
+      repositionLoop();
     };
 
     snapAnimId = requestAnimationFrame(tick);
@@ -164,10 +182,6 @@ function initGalleryDragCarousel() {
 
   const measure = () => {
     loopWidth = track.scrollWidth / 2;
-    if (loopWidth > 0) {
-      while (offset >= loopWidth) offset -= loopWidth;
-      while (offset < 0) offset += loopWidth;
-    }
     applyTransform();
   };
 
@@ -180,8 +194,7 @@ function initGalleryDragCarousel() {
         return;
       }
       offset -= velocity;
-      velocity *= 0.94;
-      normalizeOffset();
+      velocity *= 0.93;
       applyTransform();
       momentumId = requestAnimationFrame(step);
     };
@@ -220,7 +233,6 @@ function initGalleryDragCarousel() {
     lastTime = now;
 
     offset = startOffset - delta;
-    normalizeOffset();
     applyTransform();
   };
 
@@ -243,10 +255,11 @@ function initGalleryDragCarousel() {
 
     if (moved <= 10) return;
 
-    if (Math.abs(velocity) > 0.25) {
-      startMomentum(snapToNearest);
+    const releaseVelocity = velocity;
+    if (Math.abs(releaseVelocity) > 0.18) {
+      startMomentum(() => snapToNearest(releaseVelocity));
     } else {
-      snapToNearest();
+      snapToNearest(releaseVelocity);
     }
   };
 
@@ -264,15 +277,14 @@ function initGalleryDragCarousel() {
       e.preventDefault();
       stopMomentum();
       stopSnap();
-      offset += delta;
-      normalizeOffset();
+      offset += delta * 1.45;
       applyTransform();
 
       if (wheelSnapTimer) clearTimeout(wheelSnapTimer);
       wheelSnapTimer = window.setTimeout(() => {
         wheelSnapTimer = 0;
         snapToNearest();
-      }, 140);
+      }, 90);
     },
     { passive: false }
   );

@@ -70,6 +70,7 @@ function initGalleryDragCarousel() {
 
   let snapCleanupTimer = 0;
   let pendingTargetIdx = null;
+  let snapTransitionHandler = null;
 
   const applyTransform = () => {
     track.style.transform = `translate3d(-${offset}px, 0, 0)`;
@@ -120,6 +121,10 @@ function initGalleryDragCarousel() {
       clearTimeout(snapCleanupTimer);
       snapCleanupTimer = 0;
     }
+    if (snapTransitionHandler) {
+      track.removeEventListener('transitionend', snapTransitionHandler);
+      snapTransitionHandler = null;
+    }
     if (track.classList.contains('is-snapping')) {
       offset = readCurrentOffset();
       applyTransform();
@@ -133,11 +138,15 @@ function initGalleryDragCarousel() {
   };
 
   const finishSnap = (target, targetIdx) => {
-    track.classList.remove('is-snapping', 'is-wheel-snap');
+    if (snapTransitionHandler) {
+      track.removeEventListener('transitionend', snapTransitionHandler);
+      snapTransitionHandler = null;
+    }
     if (snapCleanupTimer) {
       clearTimeout(snapCleanupTimer);
       snapCleanupTimer = 0;
     }
+    track.classList.remove('is-snapping', 'is-wheel-snap');
     offset = target;
     applyTransform();
     repositionLoop(targetIdx);
@@ -162,15 +171,13 @@ function initGalleryDragCarousel() {
     track.classList.add('is-snapping');
     if (fromWheel) track.classList.add('is-wheel-snap');
 
-    const onTransitionEnd = (e) => {
+    snapTransitionHandler = (e) => {
       if (e.target !== track || e.propertyName !== 'transform') return;
-      track.removeEventListener('transitionend', onTransitionEnd);
       finishSnap(target, targetIdx);
     };
 
-    track.addEventListener('transitionend', onTransitionEnd);
+    track.addEventListener('transitionend', snapTransitionHandler);
     snapCleanupTimer = window.setTimeout(() => {
-      track.removeEventListener('transitionend', onTransitionEnd);
       finishSnap(target, targetIdx);
     }, fromWheel ? 520 : 440);
 

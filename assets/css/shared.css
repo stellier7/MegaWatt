@@ -125,12 +125,13 @@ a { color: inherit; }
 
 .nfc-card {
   position: relative;
-  border-radius: 26px;
-  padding: 34px 30px 30px;
-  min-height: 340px;
+  border-radius: 16px;
+  padding: 26px 24px 22px;
+  min-height: unset;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start;
+  gap: 18px;
   cursor: pointer;
   border: 1px solid var(--line);
   box-shadow: 0 24px 50px -18px rgba(0, 0, 0, 0.55);
@@ -154,35 +155,35 @@ a { color: inherit; }
   color: #1b0e05;
 }
 
-.nfc-card h3 { font-size: 34px; margin: 0; line-height: 0.95; }
+.nfc-card h3 { font-size: 28px; margin: 0; line-height: 0.95; }
 
 .nfc-card p {
   font-family: 'Manrope', sans-serif;
   font-weight: 500;
-  font-size: 14.5px;
-  line-height: 1.5;
-  margin: 14px 0 0;
+  font-size: 14px;
+  line-height: 1.45;
+  margin: 10px 0 0;
   opacity: .85;
-  max-width: 80%;
+  max-width: 85%;
 }
 
 .nfc-card .cta-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 26px;
+  margin-top: 0;
 }
 
 .nfc-card .cta-row span {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: .03em;
 }
 
 .nfc-card .arrow {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -196,9 +197,9 @@ a { color: inherit; }
 
 .nfc-card .ghost-bolt {
   position: absolute;
-  right: -30px;
-  bottom: -30px;
-  width: 180px;
+  right: -24px;
+  bottom: -24px;
+  width: 140px;
   opacity: .12;
   transform: rotate(8deg);
 }

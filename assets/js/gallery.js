@@ -78,21 +78,25 @@ function initGalleryDragCarousel() {
       const slide = slides[0];
       return slide ? slide.offsetWidth + 20 : 360;
     }
-    return slides[1].offsetLeft - slides[0].offsetLeft;
+    const first = slides[0].offsetLeft + slides[0].offsetWidth / 2;
+    const second = slides[1].offsetLeft + slides[1].offsetWidth / 2;
+    return second - first;
   };
 
-  const getSlide0BaseOffset = () => {
-    const slide = track.querySelector('.gallery-slide');
-    if (!slide) return 0;
-    return slide.offsetLeft + slide.offsetWidth / 2 - carousel.clientWidth / 2;
+  const getSlideOffsets = () => {
+    const carouselCenter = carousel.clientWidth / 2;
+    return Array.from(track.querySelectorAll('.gallery-slide')).map(
+      (slide) => slide.offsetLeft + slide.offsetWidth / 2 - carouselCenter
+    );
   };
 
-  const repositionLoop = () => {
-    if (loopWidth <= 0) return;
-    const before = offset;
-    while (offset >= loopWidth) offset -= loopWidth;
-    while (offset < 0) offset += loopWidth;
-    if (offset !== before) applyTransform();
+  const repositionLoop = (targetIdx) => {
+    const n = galleryItems.length;
+    const offsets = getSlideOffsets();
+    if (!offsets.length || targetIdx == null || targetIdx < n) return;
+
+    offset = offsets[targetIdx - n];
+    applyTransform();
   };
 
   const stopMomentum = () => {
@@ -110,45 +114,67 @@ function initGalleryDragCarousel() {
     track.classList.remove('is-snapping');
   };
 
-  const findSnapOffset = ({ releaseVelocity = 0 } = {}) => {
+  const findSnapTarget = ({ releaseVelocity = 0 } = {}) => {
+    const n = galleryItems.length;
+    const offsets = getSlideOffsets();
+    if (!offsets.length) return { target: offset, targetIdx: 0 };
+
     const pitch = getSlidePitch();
-    if (pitch <= 0) return offset;
+    const threshold = pitch * 0.12;
 
-    const base = getSlide0BaseOffset();
-    const relative = (offset - base) / pitch;
-    const threshold = 0.12;
-    const nearest = Math.round(relative);
-    const delta = relative - nearest;
+    let nearestIdx = 0;
+    let nearestDist = Infinity;
+    offsets.forEach((candidate, i) => {
+      const dist = Math.abs(candidate - offset);
+      if (dist < nearestDist) {
+        nearestDist = dist;
+        nearestIdx = i;
+      }
+    });
 
-    let index = nearest;
-    if (delta > threshold || releaseVelocity < -0.08) {
-      index = nearest + 1;
-    } else if (delta < -threshold || releaseVelocity > 0.08) {
-      index = nearest - 1;
+    const dragDelta = offset - offsets[nearestIdx];
+    let targetIdx = nearestIdx;
+
+    if (dragDelta > threshold || releaseVelocity < -0.08) {
+      targetIdx = nearestIdx + 1;
+    } else if (dragDelta < -threshold || releaseVelocity > 0.08) {
+      targetIdx = nearestIdx - 1;
     }
 
-    let target = base + index * pitch;
-    const span = loopWidth || pitch * galleryItems.length;
+    if (targetIdx < 0) {
+      targetIdx = n - 1;
+    } else if (targetIdx >= offsets.length) {
+      targetIdx = n;
+    }
 
-    while (target - offset > span / 2) target -= span;
-    while (target - offset < -span / 2) target += span;
+    let target = offsets[targetIdx];
+    const mod = targetIdx % n;
+    [mod, mod + n].forEach((i) => {
+      if (i < offsets.length) {
+        const candidate = offsets[i];
+        if (Math.abs(candidate - offset) < Math.abs(target - offset)) {
+          target = candidate;
+          targetIdx = i;
+        }
+      }
+    });
 
-    return target;
+    return { target, targetIdx };
   };
 
   const snapToNearest = (releaseVelocity = 0) => {
     if (loopWidth <= 0 || isDragging) return;
 
-    const target = findSnapOffset({ releaseVelocity });
+    const { target, targetIdx } = findSnapTarget({ releaseVelocity });
     if (Math.abs(target - offset) < 1) {
       offset = target;
-      repositionLoop();
+      repositionLoop(targetIdx);
       return;
     }
 
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       offset = target;
-      repositionLoop();
+      repositionLoop(targetIdx);
       return;
     }
 
@@ -174,7 +200,7 @@ function initGalleryDragCarousel() {
       snapAnimId = 0;
       track.classList.remove('is-snapping');
       offset = target;
-      repositionLoop();
+      repositionLoop(targetIdx);
     };
 
     snapAnimId = requestAnimationFrame(tick);

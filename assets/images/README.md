@@ -13,7 +13,7 @@ emergencia.mov or .mp4
 logo.jpeg
 ```
 
-Street lights use a **9:16** card frame. Other products use **1:1** (square).
+Street lights and interior focos **7W–18W** use a **9:16** card frame. Other products use **1:1** (square).
 
 ## Note on video
 

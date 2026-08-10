@@ -17,8 +17,6 @@ Pages:
 - `index.html` — landing (hero, NFC cards, catalog, distributor)
 - `productos.html` — dedicated catalog
 
-Seller demo: add `?vendedor=Jason` or `?vendedor=Marwan`, or use the strip buttons.
-
 ## Product photos
 
 1. Add image files under [`assets/images/`](assets/images/).

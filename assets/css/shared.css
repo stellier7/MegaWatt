@@ -36,58 +36,6 @@ h1, h2, h3, .display {
 a { color: inherit; }
 .container { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
 
-/* ---------- seller strip ---------- */
-.seller-strip {
-  background: var(--charcoal-soft);
-  border-bottom: 1px solid var(--line);
-  font-size: 13px;
-  color: var(--steel-light);
-  padding: 9px 0;
-}
-
-.seller-strip .container {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.seller-strip b { color: var(--amber); font-weight: 700; }
-
-.seller-strip .dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--orange);
-  display: inline-block;
-  margin-right: 8px;
-  box-shadow: 0 0 0 3px rgba(232, 97, 31, 0.18);
-}
-
-.seller-btn {
-  font-size: 11px;
-  font-weight: 700;
-  padding: 5px 10px;
-  border-radius: 999px;
-  border: 1px solid var(--line);
-  background: transparent;
-  color: var(--steel-light);
-  cursor: pointer;
-  transition: all .15s ease;
-}
-
-.seller-btn:hover,
-.seller-btn.active {
-  background: var(--orange);
-  border-color: var(--orange);
-  color: #1b0e05;
-}
-
-@media (max-width: 640px) {
-  #sellerUrlHint { display: none; }
-}
-
 /* ---------- hero ---------- */
 .hero {
   position: relative;

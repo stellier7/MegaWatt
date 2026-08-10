@@ -478,6 +478,10 @@ a { color: inherit; }
   aspect-ratio: 9 / 16;
 }
 
+.p-photo.ratio-5-7 {
+  aspect-ratio: 5 / 7;
+}
+
 .p-photo img,
 .p-photo video {
   width: 100%;

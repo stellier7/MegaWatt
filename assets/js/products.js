@@ -160,8 +160,8 @@ const products = [
     temp: '6500K',
     forma: '—',
     aplicacion: 'Interior',
-    // 7–18W packaging shots are 9:16; 20W stays square for now
-    ...( [7, 9, 12, 15, 18].includes(w) ? { ratio: '9/16' } : {} ),
+    // 7–18W packaging shots are 9:16; 20W uses 5:7
+    ...( [7, 9, 12, 15, 18].includes(w) ? { ratio: '9/16' } : { ratio: '5/7' } ),
     image: img(`foco-${w}W.jpeg`),
   })),
   ...[30, 40, 50, 60, 70, 80, 100].map((w) => ({
@@ -173,6 +173,7 @@ const products = [
     temp: '6500K',
     forma: '—',
     aplicacion: 'Pendiente',
+    ratio: '5/7',
     image: img(`foco-${w}W.jpeg`),
   })),
 
@@ -253,7 +254,9 @@ function productPhotoHtml(product) {
 }
 
 function photoClass(product) {
-  return product.ratio === '9/16' ? 'p-photo ratio-9-16' : 'p-photo';
+  if (product.ratio === '9/16') return 'p-photo ratio-9-16';
+  if (product.ratio === '5/7') return 'p-photo ratio-5-7';
+  return 'p-photo';
 }
 
 function renderCatalogTabs() {

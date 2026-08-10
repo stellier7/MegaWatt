@@ -123,7 +123,7 @@ a { color: inherit; }
   .cards-wrap { grid-template-columns: 1fr; }
 }
 
-.nfc-card {
+.action-card {
   position: relative;
   border-radius: 16px;
   padding: 26px 24px 22px;
@@ -148,16 +148,16 @@ a { color: inherit; }
   -webkit-appearance: none;
 }
 
-.nfc-card:hover { box-shadow: 0 34px 70px -18px rgba(0, 0, 0, 0.65); }
-.nfc-card.card-products { background: linear-gradient(155deg, #1d1b19, #252220 60%, #2c2723); }
-.nfc-card.card-reseller {
+.action-card:hover { box-shadow: 0 34px 70px -18px rgba(0, 0, 0, 0.65); }
+.action-card.card-products { background: linear-gradient(155deg, #1d1b19, #252220 60%, #2c2723); }
+.action-card.card-reseller {
   background: linear-gradient(155deg, var(--orange-deep), var(--orange) 65%, #f0873f);
   color: #1b0e05;
 }
 
-.nfc-card h3 { font-size: 28px; margin: 0; line-height: 0.95; }
+.action-card h3 { font-size: 28px; margin: 0; line-height: 0.95; }
 
-.nfc-card p {
+.action-card p {
   font-family: 'Manrope', sans-serif;
   font-weight: 500;
   font-size: 14px;
@@ -167,20 +167,20 @@ a { color: inherit; }
   max-width: 85%;
 }
 
-.nfc-card .cta-row {
+.action-card .cta-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-top: 0;
 }
 
-.nfc-card .cta-row span {
+.action-card .cta-row span {
   font-size: 12px;
   font-weight: 700;
   letter-spacing: .03em;
 }
 
-.nfc-card .arrow {
+.action-card .arrow {
   width: 34px;
   height: 34px;
   border-radius: 8px;
@@ -191,11 +191,11 @@ a { color: inherit; }
   transition: transform .3s ease, background .3s ease;
 }
 
-.nfc-card.card-reseller .arrow { background: rgba(0, 0, 0, 0.12); }
-.nfc-card:hover .arrow { transform: translateX(5px); background: rgba(255, 255, 255, 0.16); }
-.nfc-card.card-reseller:hover .arrow { background: rgba(0, 0, 0, 0.2); }
+.action-card.card-reseller .arrow { background: rgba(0, 0, 0, 0.12); }
+.action-card:hover .arrow { transform: translateX(5px); background: rgba(255, 255, 255, 0.16); }
+.action-card.card-reseller:hover .arrow { background: rgba(0, 0, 0, 0.2); }
 
-.nfc-card .ghost-bolt {
+.action-card .ghost-bolt {
   position: absolute;
   right: -24px;
   bottom: -24px;
@@ -204,7 +204,7 @@ a { color: inherit; }
   transform: rotate(8deg);
 }
 
-.nfc-card.card-reseller .ghost-bolt { opacity: .16; }
+.action-card.card-reseller .ghost-bolt { opacity: .16; }
 
 /* ---------- section shell ---------- */
 .section { padding: 90px 0; }

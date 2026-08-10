@@ -1,6 +1,6 @@
 # MegaWatt
 
-Static marketing site for MegaWatt LED lighting (Comayagua, Honduras): NFC-style landing page, filterable product catalog, and distributor lead form.
+Static marketing site for MegaWatt LED lighting (Comayagua, Honduras): landing page shown via salesperson NFC cards, filterable product catalog, and distributor lead form.
 
 ## Open locally
 
@@ -14,7 +14,7 @@ Then open [http://localhost:8080](http://localhost:8080).
 
 Pages:
 
-- `index.html` — landing (hero, NFC cards, catalog, distributor)
+- `index.html` — landing (hero, action cards, catalog, distributor)
 - `productos.html` — dedicated catalog
 
 ## Product photos

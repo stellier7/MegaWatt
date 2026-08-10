@@ -32,7 +32,7 @@ function initBoltField() {
 }
 
 function initCardTilt() {
-  document.querySelectorAll('.nfc-card').forEach((card) => {
+  document.querySelectorAll('.action-card').forEach((card) => {
     card.addEventListener('mousemove', (e) => {
       const r = card.getBoundingClientRect();
       const x = (e.clientX - r.left) / r.width - 0.5;

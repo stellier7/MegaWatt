@@ -20,6 +20,33 @@ function getResolvedSeller() {
   return resolveSeller(getSellerRawFromUrl());
 }
 
+const SELLER_STORAGE_KEY = 'megawatt-seller';
+
+function rememberSeller(slug) {
+  if (!slug) return;
+  try {
+    localStorage.setItem(SELLER_STORAGE_KEY, slug);
+  } catch {
+    /* ignore quota / private mode */
+  }
+}
+
+function getRememberedSeller() {
+  try {
+    return resolveSeller(localStorage.getItem(SELLER_STORAGE_KEY));
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Vendedor activo para WhatsApp / links: el de la URL, o el recordado
+ * de una visita NFC anterior (para que la cotización le caiga al vendedor).
+ */
+function getActiveSeller() {
+  return getResolvedSeller() || getRememberedSeller();
+}
+
 function sellerQuery(slug) {
   return slug ? '?vendedor=' + encodeURIComponent(slug) : '';
 }
@@ -48,5 +75,9 @@ function setSeller(slug) {
 }
 
 function initSeller() {
-  setSeller(getSellerFromUrl());
+  const fromUrl = getResolvedSeller();
+  if (fromUrl) rememberSeller(fromUrl.slug);
+
+  const active = getActiveSeller();
+  setSeller(active?.slug || getSellerFromUrl());
 }

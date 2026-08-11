@@ -7,7 +7,7 @@ function formatLeadPhone() {
 }
 
 function greetingLine() {
-  const seller = getResolvedSeller();
+  const seller = getActiveSeller();
   if (seller) {
     return `Hola ${seller.firstName}, quiero ser distribuidor MegaWatt.`;
   }
@@ -15,7 +15,7 @@ function greetingLine() {
 }
 
 function shortInterestMessage() {
-  const seller = getResolvedSeller();
+  const seller = getActiveSeller();
   if (seller) {
     return `Hola ${seller.firstName}, me interesa ser distribuidor MegaWatt.`;
   }
@@ -27,7 +27,7 @@ function buildDistributorLeadMessage() {
   const business = document.getElementById('lead-business')?.value.trim() || '';
   const phone = formatLeadPhone();
   const city = document.getElementById('lead-city')?.value.trim() || '';
-  const seller = getResolvedSeller();
+  const seller = getActiveSeller();
   const rawSeller = getSellerFromUrl();
 
   const lines = [greetingLine(), ''];

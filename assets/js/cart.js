@@ -86,11 +86,17 @@ function clearCart() {
 }
 
 function cartQuoteGreeting() {
-  const seller = typeof getResolvedSeller === 'function' ? getResolvedSeller() : null;
+  const seller = typeof getActiveSeller === 'function' ? getActiveSeller() : null;
   if (seller) {
     return `Hola ${seller.firstName}, quiero cotizar estos productos MegaWatt y confirmar disponibilidad:`;
   }
   return 'Hola, quiero cotizar estos productos MegaWatt y confirmar disponibilidad:';
+}
+
+function cartDestinationLabel() {
+  const seller = typeof getActiveSeller === 'function' ? getActiveSeller() : null;
+  if (seller) return seller.firstName;
+  return 'Ferretería El Jordán';
 }
 
 function formatCartLineSpecs(product) {
@@ -117,6 +123,24 @@ function submitCartQuote() {
   const lines = getCartLines();
   if (!lines.length) return;
   window.open(whatsAppUrl(buildCartQuoteMessage()), '_blank', 'noopener');
+}
+
+function updateCartDestinationCopy() {
+  const sub = document.querySelector('.cart-drawer-sub');
+  const quoteBtn = document.getElementById('cartQuoteBtn');
+  const seller = typeof getActiveSeller === 'function' ? getActiveSeller() : null;
+  const destination = cartDestinationLabel();
+
+  if (sub) {
+    sub.textContent = seller
+      ? `La lista se envía a ${destination} por WhatsApp para cotizar y confirmar stock.`
+      : 'Arma la lista y envíala por WhatsApp a Ferretería El Jordán.';
+  }
+  if (quoteBtn) {
+    quoteBtn.textContent = seller
+      ? `Pedir cotización a ${destination}`
+      : 'Pedir cotización por WhatsApp';
+  }
 }
 
 function cartThumbHtml(product) {
@@ -204,6 +228,7 @@ function renderCartDrawer() {
   badge.textContent = String(total);
   fab.hidden = total === 0;
   fab.classList.toggle('is-empty', total === 0);
+  updateCartDestinationCopy();
 
   if (!lines.length) {
     linesEl.innerHTML = '';

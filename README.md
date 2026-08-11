@@ -59,6 +59,6 @@ Registro en [`assets/js/sellers.js`](assets/js/sellers.js). URL corta para cada 
 
 Ejemplo en producción actual: `https://mega-watt-wheat.vercel.app/v/ramon`
 
-Con vendedor en la URL, el formulario y el botón de WhatsApp abren el chat **del vendedor** con saludo personalizado (`Hola Ramón, …`). Sin vendedor, el contacto es **Ferretería El Jordán** (+504 9500-2199). El carrito de cotización (Agregar en el catálogo / featured → lista → WhatsApp) usa el mismo destino.
+Con vendedor en la URL (`/v/{slug}` o `?vendedor=`), el formulario, el carrito de cotización y el botón de WhatsApp abren el chat **del vendedor** con saludo personalizado (`Hola Ramón, …`). Ese vendedor queda recordado en el navegador para que, si el cliente sigue al catálogo sin el parámetro, la cotización **siga yéndole a él** (y no a Jordán). Sin vendedor, el contacto es **Ferretería El Jordán** (+504 9500-2199).
 
 También funciona `?vendedor=ramon` (y queda en los links al catálogo).

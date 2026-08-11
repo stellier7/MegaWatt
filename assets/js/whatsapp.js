@@ -1,7 +1,9 @@
 /** Shared WhatsApp helpers (vendedor activo o Ferretería El Jordán). */
 
 function activeWhatsAppNumber() {
-  const seller = typeof getResolvedSeller === 'function' ? getResolvedSeller() : null;
+  const seller =
+    (typeof getActiveSeller === 'function' ? getActiveSeller() : null) ||
+    (typeof getResolvedSeller === 'function' ? getResolvedSeller() : null);
   return seller?.whatsapp || JORDAN_WHATSAPP;
 }
 

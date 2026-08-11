@@ -1,9 +1,14 @@
-const MEGAWATT_WHATSAPP = '50495002199';
+const MEGAWATT_WHATSAPP = JORDAN_WHATSAPP;
 
 let selectedCountry = COUNTRY_DIAL_CODES[0];
 
-function whatsAppUrl(message) {
-  const base = 'https://wa.me/' + MEGAWATT_WHATSAPP;
+function activeWhatsAppNumber() {
+  const seller = getResolvedSeller();
+  return seller?.whatsapp || MEGAWATT_WHATSAPP;
+}
+
+function whatsAppUrl(message, phone = activeWhatsAppNumber()) {
+  const base = 'https://wa.me/' + phone;
   if (!message) return base;
   return base + '?text=' + encodeURIComponent(message);
 }
@@ -14,19 +19,37 @@ function formatLeadPhone() {
   return `+${selectedCountry.dial} ${local}`;
 }
 
+function greetingLine() {
+  const seller = getResolvedSeller();
+  if (seller) {
+    return `Hola ${seller.firstName}, quiero ser distribuidor MegaWatt.`;
+  }
+  return 'Hola, quiero ser distribuidor MegaWatt.';
+}
+
+function shortInterestMessage() {
+  const seller = getResolvedSeller();
+  if (seller) {
+    return `Hola ${seller.firstName}, me interesa ser distribuidor MegaWatt.`;
+  }
+  return 'Hola, me interesa ser distribuidor MegaWatt.';
+}
+
 function buildDistributorLeadMessage() {
   const name = document.getElementById('lead-name')?.value.trim() || '';
   const business = document.getElementById('lead-business')?.value.trim() || '';
   const phone = formatLeadPhone();
   const city = document.getElementById('lead-city')?.value.trim() || '';
-  const seller = getSellerFromUrl();
+  const seller = getResolvedSeller();
+  const rawSeller = getSellerFromUrl();
 
-  const lines = ['Hola, quiero ser distribuidor MegaWatt.', ''];
+  const lines = [greetingLine(), ''];
   if (name) lines.push('Nombre: ' + name);
   if (business) lines.push('Negocio: ' + business);
   if (phone) lines.push('Teléfono: ' + phone);
   if (city) lines.push('Ciudad, País: ' + city);
-  if (seller) lines.push('Referido por: ' + seller);
+  // Solo si hay un referido desconocido (no está en el registro) y el chat va a Jordán.
+  if (!seller && rawSeller) lines.push('Referido por: ' + rawSeller);
 
   return lines.join('\n').trim();
 }
@@ -173,7 +196,7 @@ function initContact() {
 
   const waLink = document.querySelector('.wa-link');
   if (waLink) {
-    waLink.href = whatsAppUrl('Hola, me interesa ser distribuidor MegaWatt.');
+    waLink.href = whatsAppUrl(shortInterestMessage());
     waLink.removeAttribute('onclick');
   }
 

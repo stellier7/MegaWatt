@@ -1,0 +1,14 @@
+{
+  "redirects": [
+    {
+      "source": "/v/:slug",
+      "destination": "/?vendedor=:slug",
+      "permanent": false
+    },
+    {
+      "source": "/v/:slug/",
+      "destination": "/?vendedor=:slug",
+      "permanent": false
+    }
+  ]
+}

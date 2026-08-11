@@ -17,6 +17,10 @@ Pages:
 - `index.html` — landing (hero, action cards, catalog, distributor)
 - `productos.html` — dedicated catalog
 
+Local seller test (sin redirect de Vercel):
+
+- [http://localhost:8080/?vendedor=ramon](http://localhost:8080/?vendedor=ramon)
+
 ## Product photos
 
 1. Add image files under [`assets/images/`](assets/images/).
@@ -26,19 +30,35 @@ Cards without an `image` keep the “Foto pendiente” placeholder.
 
 ## Deploy
 
-Hosted on [Vercel](https://vercel.com) via GitHub integration. No build step — the repo root is served as a static site.
+Hosted on [Vercel](https://vercel.com) via GitHub integration. No build step — the repo root is served as a static site. [`vercel.json`](vercel.json) redirects `/v/:slug` → `/?vendedor=:slug`.
 
 | | |
 |---|---|
 | **Production** | [mega-watt-wheat.vercel.app](https://mega-watt-wheat.vercel.app) |
 | **Branch** | `main` deploys to production; every push also gets a Preview URL |
-| **Config** | Managed in the Vercel dashboard (no `vercel.json` in repo) |
+| **Config** | Redirects in repo (`vercel.json`); other project settings in the Vercel dashboard |
 
-## Distributor leads
+Custom domain (p. ej. megawatt.com) pendiente de confirmar — las mismas rutas `/v/{slug}` aplican cuando se apunte el dominio.
 
-The lead form and WhatsApp link on the landing page open a chat with **+504 9500-2199** (MegaWatt / ferretería central).
+## Vendedores (tarjetas NFC)
 
-- **Form submit** — pre-filled message with name, business, phone, and city.
-- **“Escribir por WhatsApp”** — shorter intro message without form fields.
+Registro en [`assets/js/sellers.js`](assets/js/sellers.js). URL corta para cada tarjeta:
 
-Salesperson NFC cards use `?vendedor=nombre` on the URL so internal links keep the referral. Per-vendor WhatsApp numbers and personalized greetings (e.g. “Hola María…”) are planned for a later phase once cards are assigned.
+| Vendedor | NFC / link |
+|---|---|
+| Ramón Euceda | `/v/ramon` |
+| Isaac Rodriguez | `/v/isaac` |
+| Edson Nuñez | `/v/edson` |
+| Yeison Padilla | `/v/yeison` |
+| Marvin Reyes | `/v/marvin` |
+| Jose Carlos Dias | `/v/jose-carlos` |
+| Nelson Leiva | `/v/nelson` |
+| Edwin Ramos | `/v/edwin` |
+| Ruth Alcerro | `/v/ruth` |
+| Marwan Khaliliyeh | `/v/marwan` |
+
+Ejemplo en producción actual: `https://mega-watt-wheat.vercel.app/v/ramon`
+
+Con vendedor en la URL, el formulario y el botón de WhatsApp abren el chat **del vendedor** con saludo personalizado (`Hola Ramón, …`). Sin vendedor, el contacto es **Ferretería El Jordán** (+504 9500-2199).
+
+También funciona `?vendedor=ramon` (y queda en los links al catálogo).

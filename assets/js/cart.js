@@ -116,7 +116,7 @@ function buildCartQuoteMessage() {
     return `${index + 1}. ${line.product.nombre} — ${quantityLabel(line.qty)}`;
   });
 
-  return [cartQuoteGreeting(), '', ...body, '', '¿Me confirmas precios y stock? Gracias.'].join('\n');
+  return [cartQuoteGreeting(), '', ...body, '', '¿Me confirmas precios y disponibilidad? Gracias.'].join('\n');
 }
 
 function submitCartQuote() {

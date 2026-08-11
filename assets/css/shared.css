@@ -11,14 +11,20 @@
 }
 
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+html {
+  scroll-behavior: smooth;
+  overflow-x: clip;
+  max-width: 100%;
+}
 
 body {
   margin: 0;
   background: var(--charcoal);
   color: var(--paper);
   font-family: 'Manrope', sans-serif;
-  overflow-x: hidden;
+  overflow-x: clip;
+  max-width: 100%;
+  overscroll-behavior-x: none;
 }
 
 h1, h2, h3, .display {
@@ -88,10 +94,12 @@ a { color: inherit; }
 .hero h1 {
   position: relative;
   z-index: 2;
-  font-size: clamp(48px, 9vw, 104px);
+  font-size: clamp(36px, 10vw, 104px);
   line-height: 0.86;
   margin: 0;
   color: var(--paper);
+  max-width: 100%;
+  padding-inline: 12px;
 }
 
 .hero h1 .bolt-char {
@@ -110,13 +118,17 @@ a { color: inherit; }
 }
 
 /* ---------- card stack ---------- */
-.stack-section { padding: 40px 0 100px; }
+.stack-section {
+  padding: 40px 0 100px;
+  overflow-x: clip;
+}
 
 .cards-wrap {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 28px;
   perspective: 1400px;
+  overflow-x: clip;
 }
 
 @media (max-width: 760px) {
@@ -207,8 +219,15 @@ a { color: inherit; }
 .action-card.card-reseller .ghost-bolt { opacity: .16; }
 
 /* ---------- section shell ---------- */
-.section { padding: 90px 0; }
-.featured-section { padding: 56px 0 64px; }
+.section {
+  padding: 90px 0;
+  overflow-x: clip;
+}
+
+.featured-section {
+  padding: 56px 0 64px;
+  overflow-x: clip;
+}
 .featured-section .section-head { margin-bottom: 32px; }
 .section.alt {
   background: var(--charcoal-soft);
@@ -1076,7 +1095,7 @@ body.gallery-lightbox-open {
   z-index: 30;
   top: calc(100% + 6px);
   left: 0;
-  width: min(340px, calc(100vw - 48px));
+  width: min(340px, calc(100dvw - 48px));
   background: #1e1c1a;
   border: 1px solid var(--line);
   border-radius: 14px;
@@ -1294,6 +1313,14 @@ footer {
   transform: translate(0);
 }
 
+@media (max-width: 760px) {
+  .reveal-from-left,
+  .reveal-from-right {
+    transform: translateY(24px);
+    transition-delay: 0s;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .reveal-from-left,
   .reveal-from-right {
@@ -1365,7 +1392,7 @@ body.cart-open {
   z-index: 80;
   top: 0;
   right: 0;
-  width: min(400px, 100vw);
+  width: min(400px, 100%);
   height: 100%;
   background: var(--charcoal-soft);
   border-left: 1px solid var(--line);

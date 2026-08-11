@@ -133,7 +133,7 @@ function updateCartDestinationCopy() {
 
   if (sub) {
     sub.textContent = seller
-      ? `La lista se envía a ${destination} por WhatsApp para cotizar y confirmar stock.`
+      ? `La lista se envía a ${destination} por WhatsApp para cotizar y confirmar disponibilidad.`
       : 'Arma la lista y envíala por WhatsApp a Ferretería El Jordán.';
   }
   if (quoteBtn) {

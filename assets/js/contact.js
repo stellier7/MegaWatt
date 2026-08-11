@@ -1,17 +1,4 @@
-const MEGAWATT_WHATSAPP = JORDAN_WHATSAPP;
-
 let selectedCountry = COUNTRY_DIAL_CODES[0];
-
-function activeWhatsAppNumber() {
-  const seller = getResolvedSeller();
-  return seller?.whatsapp || MEGAWATT_WHATSAPP;
-}
-
-function whatsAppUrl(message, phone = activeWhatsAppNumber()) {
-  const base = 'https://wa.me/' + phone;
-  if (!message) return base;
-  return base + '?text=' + encodeURIComponent(message);
-}
 
 function formatLeadPhone() {
   const local = document.getElementById('lead-phone')?.value.trim() || '';

@@ -7,6 +7,7 @@ const img = (file) => (file ? `assets/images/${file}` : '');
 const products = [
   // --- Spots ---
   {
+    id: 'spot-redondo-3w',
     nombre: 'Spot redondo 3W',
     categoria: 'Iluminación Interior',
     subcategoria: 'Spots LED · Redondos',
@@ -18,6 +19,7 @@ const products = [
     image: img('spot-redondo-3W.jpeg'),
   },
   {
+    id: 'spot-redondo-6w',
     nombre: 'Spot redondo 6W',
     categoria: 'Iluminación Interior',
     subcategoria: 'Spots LED · Redondos',
@@ -29,6 +31,7 @@ const products = [
     image: img('spot-redondo-6W.jpeg'),
   },
   {
+    id: 'spot-redondo-12w',
     nombre: 'Spot redondo 12W',
     categoria: 'Iluminación Interior',
     subcategoria: 'Spots LED · Redondos',
@@ -40,6 +43,7 @@ const products = [
     image: img('spot-redondo-12W.jpeg'),
   },
   {
+    id: 'spot-redondo-color-6-3w',
     nombre: 'Spot redondo color 6+3W',
     categoria: 'Iluminación Interior',
     subcategoria: 'Spots LED · Redondos',
@@ -51,6 +55,7 @@ const products = [
     image: img('spot-redondo-color-6+3W.jpeg'),
   },
   {
+    id: 'spot-redondo-color-12-4w',
     nombre: 'Spot redondo color 12+4W',
     categoria: 'Iluminación Interior',
     subcategoria: 'Spots LED · Redondos',
@@ -62,6 +67,7 @@ const products = [
     image: img('spot-redondo-color-12+4W.jpeg'),
   },
   {
+    id: 'spot-cuadrado-3w',
     nombre: 'Spot cuadrado 3W',
     categoria: 'Iluminación Interior',
     subcategoria: 'Spots LED · Cuadrados',
@@ -73,6 +79,7 @@ const products = [
     image: img('spot-cuadrado-3W.jpeg'),
   },
   {
+    id: 'spot-cuadrado-color-3-3w',
     nombre: 'Spot cuadrado color 3+3W',
     categoria: 'Iluminación Interior',
     subcategoria: 'Spots LED · Cuadrados',
@@ -84,6 +91,7 @@ const products = [
     image: img('spot-cuadrado-color-3+3W.jpeg'),
   },
   {
+    id: 'spot-cuadrado-6w',
     nombre: 'Spot cuadrado 6W',
     categoria: 'Iluminación Interior',
     subcategoria: 'Spots LED · Cuadrados',
@@ -95,6 +103,7 @@ const products = [
     image: img('spot-cuadrado-6W.jpeg'),
   },
   {
+    id: 'spot-cuadrado-color-6-3w',
     nombre: 'Spot cuadrado color 6+3W',
     categoria: 'Iluminación Interior',
     subcategoria: 'Spots LED · Cuadrados',
@@ -106,6 +115,7 @@ const products = [
     image: img('spot-cuadrado-color-6+3W.jpeg'),
   },
   {
+    id: 'spot-cuadrado-12w',
     nombre: 'Spot cuadrado 12W',
     categoria: 'Iluminación Interior',
     subcategoria: 'Spots LED · Cuadrados',
@@ -117,6 +127,7 @@ const products = [
     image: img('spot-cuadrado-12W.jpeg'),
   },
   {
+    id: 'spot-cuadrado-color-12-4w',
     nombre: 'Spot cuadrado color 12+4W',
     categoria: 'Iluminación Interior',
     subcategoria: 'Spots LED · Cuadrados',
@@ -128,6 +139,7 @@ const products = [
     image: img('spot-cuadrado-color-12+4W.jpeg'),
   },
   {
+    id: 'spot-cuadrado-18w',
     nombre: 'Spot cuadrado 18W',
     categoria: 'Iluminación Interior',
     subcategoria: 'Spots LED · Cuadrados',
@@ -139,6 +151,7 @@ const products = [
     image: img('spot-cuadrado-18W.jpeg'),
   },
   {
+    id: 'spot-cuadrado-color-18-6w',
     nombre: 'Spot cuadrado color 18+6W',
     categoria: 'Iluminación Interior',
     subcategoria: 'Spots LED · Cuadrados',
@@ -152,6 +165,7 @@ const products = [
 
   // --- Focos ---
   ...[7, 9, 12, 15, 18, 20].map((w) => ({
+    id: `foco-led-${w}w`,
     nombre: `Foco LED ${w}W`,
     categoria: 'Iluminación Interior',
     subcategoria: 'Focos LED',
@@ -165,6 +179,7 @@ const products = [
     image: img(`foco-${w}W.jpeg`),
   })),
   ...[30, 40, 50, 60, 70, 80, 100].map((w) => ({
+    id: `foco-led-${w}w`,
     nombre: `Foco LED ${w}W`,
     categoria: 'Iluminación Exterior',
     subcategoria: 'Focos LED de Alta Potencia',
@@ -179,6 +194,7 @@ const products = [
 
   // --- Street ---
   {
+    id: 'led-street-light-150w',
     nombre: 'LED Street Light 150W',
     categoria: 'Iluminación Exterior',
     subcategoria: 'Lámparas LED para Calle',
@@ -191,6 +207,7 @@ const products = [
     image: img('street-150W.jpeg'),
   },
   {
+    id: 'led-street-light-200w',
     nombre: 'LED Street Light 200W',
     categoria: 'Iluminación Exterior',
     subcategoria: 'Lámparas LED para Calle',
@@ -205,6 +222,7 @@ const products = [
 
   // --- Emergencia ---
   {
+    id: 'bombillo-led-de-emergencia',
     nombre: 'Bombillo LED de Emergencia',
     categoria: 'Iluminación de Emergencia',
     subcategoria: 'Bombillos LED de Emergencia',
@@ -268,9 +286,27 @@ function getFeaturedProducts() {
     .filter(Boolean);
 }
 
+function cartQtyForProduct(id) {
+  if (typeof getCartQty !== 'function') return 0;
+  return getCartQty(id);
+}
+
+function addToCartButtonHtml(p) {
+  const qty = cartQtyForProduct(p.id);
+  const inCart = qty > 0;
+  return `
+    <button
+      type="button"
+      class="add-to-cart-btn${inCart ? ' is-in-cart' : ''}"
+      data-product-id="${p.id}"
+      aria-label="${inCart ? `Agregar otra unidad de ${p.nombre}` : `Agregar ${p.nombre} al carrito`}"
+    >${inCart ? `En el carrito · ${qty}` : 'Agregar'}</button>
+  `;
+}
+
 function productCardHtml(p) {
   return `
-    <div class="product-card">
+    <div class="product-card" data-product-id="${p.id}">
       <div class="${photoClass(p)}">${productPhotoHtml(p)}</div>
       <div class="p-body">
         <div class="p-cat">${p.subcategoria}</div>
@@ -280,6 +316,7 @@ function productCardHtml(p) {
           ${p.forma !== '—' ? `<span>${p.forma}</span>` : ''}
           <span>${p.aplicacion}</span>
         </div>
+        ${addToCartButtonHtml(p)}
       </div>
     </div>
   `;
@@ -287,7 +324,7 @@ function productCardHtml(p) {
 
 function featuredCardHtml(p) {
   return `
-    <div class="product-card featured-card">
+    <div class="product-card featured-card" data-product-id="${p.id}">
       <div class="p-photo featured-photo">${productPhotoHtml(p)}</div>
       <div class="p-body">
         <div class="p-cat">${p.subcategoria}</div>
@@ -297,9 +334,26 @@ function featuredCardHtml(p) {
           ${p.forma !== '—' ? `<span>${p.forma}</span>` : ''}
           <span>${p.aplicacion}</span>
         </div>
+        ${addToCartButtonHtml(p)}
       </div>
     </div>
   `;
+}
+
+function refreshProductCardButtons() {
+  document.querySelectorAll('.add-to-cart-btn[data-product-id]').forEach((btn) => {
+    const id = btn.dataset.productId;
+    const product = products.find((p) => p.id === id);
+    if (!product) return;
+    const qty = cartQtyForProduct(id);
+    const inCart = qty > 0;
+    btn.classList.toggle('is-in-cart', inCart);
+    btn.textContent = inCart ? `En el carrito · ${qty}` : 'Agregar';
+    btn.setAttribute(
+      'aria-label',
+      inCart ? `Agregar otra unidad de ${product.nombre}` : `Agregar ${product.nombre} al carrito`
+    );
+  });
 }
 
 function updateFilterDropdownTrigger(dropdown) {

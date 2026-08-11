@@ -585,7 +585,7 @@ a { color: inherit; }
 
 .gallery-carousel {
   overflow: hidden;
-  touch-action: pan-y pinch-zoom;
+  touch-action: none;
   cursor: grab;
   user-select: none;
   -webkit-user-select: none;
@@ -610,11 +610,7 @@ a { color: inherit; }
 }
 
 .gallery-track.is-snapping {
-  transition: transform 0.38s cubic-bezier(0.33, 1, 0.68, 1);
-}
-
-.gallery-track.is-snapping.is-wheel-snap {
-  transition: transform 0.46s cubic-bezier(0.25, 1, 0.45, 1);
+  transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .gallery-slide {

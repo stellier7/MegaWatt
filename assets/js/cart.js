@@ -100,11 +100,14 @@ function formatCartLineSpecs(product) {
   return parts.join(' · ');
 }
 
+function quantityLabel(qty) {
+  return qty === 1 ? '1 unidad' : `${qty} unidades`;
+}
+
 function buildCartQuoteMessage() {
   const lines = getCartLines();
   const body = lines.map((line, index) => {
-    const specs = formatCartLineSpecs(line.product);
-    return `${index + 1}. ${line.product.nombre} — ${specs} × ${line.qty}`;
+    return `${index + 1}. ${line.product.nombre} — ${quantityLabel(line.qty)}`;
   });
 
   return [cartQuoteGreeting(), '', ...body, '', '¿Me confirmas precios y stock? Gracias.'].join('\n');

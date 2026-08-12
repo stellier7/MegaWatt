@@ -56,6 +56,11 @@ const SELLERS = {
     firstName: 'Marwan',
     whatsapp: '50496534139',
   },
+  santiago: {
+    name: 'Santiago',
+    firstName: 'Santiago',
+    whatsapp: '50496784678',
+  },
 };
 
 function normalizeSellerKey(value) {

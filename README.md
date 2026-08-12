@@ -56,6 +56,7 @@ Registro en [`assets/js/sellers.js`](assets/js/sellers.js). URL corta para cada 
 | Edwin Ramos | `/v/edwin` |
 | Ruth Alcerro | `/v/ruth` |
 | Marwan Khaliliyeh | `/v/marwan` |
+| Santiago | `/v/santiago` |
 
 Ejemplo en producción actual: `https://mega-watt-wheat.vercel.app/v/ramon`
 

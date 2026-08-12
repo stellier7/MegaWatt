@@ -68,7 +68,7 @@ function initAutoCarousel(track, carousel, options = {}) {
 
   const speed = options.speed ?? 0.55;
   const staticClass = options.staticClass ?? 'auto-carousel--static';
-  const axisThreshold = 8;
+  const dragThreshold = 6;
   const dragResumeDelay = 600;
 
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -83,13 +83,18 @@ function initAutoCarousel(track, carousel, options = {}) {
   let loopWidth = 0;
   let rafId = 0;
   let resumeTimer = 0;
+  let momentumId = 0;
 
   let isDragging = false;
-  let axis = null;
+  let gestureMode = null;
   let startX = 0;
   let startY = 0;
   let startOffset = 0;
   let moved = 0;
+  let lastX = 0;
+  let lastTime = 0;
+  let velocity = 0;
+  let activePointerId = null;
 
   const applyTransform = () => {
     track.style.transform = `translate3d(-${offset}px, 0, 0)`;
@@ -126,49 +131,110 @@ function initAutoCarousel(track, carousel, options = {}) {
     resumeTimer = window.setTimeout(resume, dragResumeDelay);
   };
 
+  const stopMomentum = () => {
+    if (momentumId) {
+      cancelAnimationFrame(momentumId);
+      momentumId = 0;
+    }
+  };
+
+  const startMomentum = () => {
+    stopMomentum();
+    if (Math.abs(velocity) < 0.15) {
+      scheduleResume();
+      return;
+    }
+
+    let lastFrame = performance.now();
+    const step = (now) => {
+      const dt = now - lastFrame;
+      lastFrame = now;
+      offset -= velocity * dt;
+      velocity *= 0.92;
+      normalizeOffset();
+
+      if (Math.abs(velocity) > 0.05) {
+        momentumId = requestAnimationFrame(step);
+      } else {
+        momentumId = 0;
+        scheduleResume();
+      }
+    };
+    momentumId = requestAnimationFrame(step);
+  };
+
   if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
     carousel.addEventListener('mouseenter', pause);
     carousel.addEventListener('mouseleave', () => {
-      if (!isDragging) resume();
+      if (!isDragging && !momentumId) resume();
     });
   }
 
+  const resetGesture = () => {
+    isDragging = false;
+    gestureMode = null;
+    activePointerId = null;
+    carousel.classList.remove('is-dragging');
+  };
+
   const onPointerDown = (e) => {
     if (e.pointerType === 'mouse' && e.button !== 0) return;
+    stopMomentum();
+    window.clearTimeout(resumeTimer);
+    pause();
+
+    gestureMode = null;
     isDragging = false;
-    axis = null;
+    activePointerId = e.pointerId;
     moved = 0;
+    velocity = 0;
     startX = e.clientX;
     startY = e.clientY;
+    lastX = e.clientX;
+    lastTime = performance.now();
     startOffset = readCurrentOffset();
     offset = startOffset;
   };
 
   const onPointerMove = (e) => {
-    if (axis === null) {
-      const dx = Math.abs(e.clientX - startX);
-      const dy = Math.abs(e.clientY - startY);
-      if (dx < axisThreshold && dy < axisThreshold) return;
-      axis = dx > dy ? 'x' : 'y';
-      if (axis === 'y') return;
-      isDragging = true;
-      pause();
-      carousel.classList.add('is-dragging');
-      carousel.setPointerCapture(e.pointerId);
+    if (activePointerId !== e.pointerId) return;
+
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+    const absDx = Math.abs(dx);
+    const absDy = Math.abs(dy);
+
+    if (gestureMode === null) {
+      if (absDx < dragThreshold && absDy < dragThreshold) return;
+      gestureMode = absDx > absDy * 1.1 ? 'horizontal' : 'vertical';
+      if (gestureMode === 'horizontal') {
+        isDragging = true;
+        carousel.classList.add('is-dragging');
+        carousel.setPointerCapture(e.pointerId);
+      } else {
+        return;
+      }
     }
 
-    if (axis === 'y' || !isDragging) return;
+    if (gestureMode === 'vertical' || !isDragging) return;
 
-    const delta = e.clientX - startX;
-    moved = Math.max(moved, Math.abs(delta));
-    offset = startOffset - delta;
+    e.preventDefault();
+    const now = performance.now();
+    if (now - lastTime > 0) {
+      velocity = (e.clientX - lastX) / (now - lastTime);
+    }
+    lastX = e.clientX;
+    lastTime = now;
+
+    moved = Math.max(moved, absDx);
+    offset = startOffset - dx;
     applyTransform();
   };
 
   const onPointerUp = (e) => {
+    if (activePointerId !== e.pointerId) return;
+
     if (isDragging) {
-      isDragging = false;
-      carousel.classList.remove('is-dragging');
       if (carousel.hasPointerCapture?.(e.pointerId)) {
         carousel.releasePointerCapture(e.pointerId);
       }
@@ -183,20 +249,25 @@ function initAutoCarousel(track, carousel, options = {}) {
         }
       });
 
-      if (moved > 10) scheduleResume();
-      else resume();
+      if (moved > 10) {
+        startMomentum();
+      } else {
+        resume();
+      }
+    } else if (gestureMode === 'vertical' || gestureMode === null) {
+      resume();
     }
 
-    axis = null;
+    resetGesture();
   };
 
   carousel.addEventListener('pointerdown', onPointerDown);
-  carousel.addEventListener('pointermove', onPointerMove);
+  carousel.addEventListener('pointermove', onPointerMove, { passive: false });
   carousel.addEventListener('pointerup', onPointerUp);
   carousel.addEventListener('pointercancel', onPointerUp);
 
   const tick = () => {
-    if (!paused && inView && loopWidth > 0) {
+    if (!paused && !momentumId && inView && loopWidth > 0) {
       offset += speed;
       if (offset >= loopWidth) offset -= loopWidth;
       applyTransform();

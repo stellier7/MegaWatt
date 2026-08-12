@@ -426,6 +426,7 @@ a { color: inherit; }
 
 .featured-carousel {
   overflow: hidden;
+  touch-action: pan-y;
   cursor: grab;
   user-select: none;
   -webkit-user-select: none;
@@ -436,6 +437,7 @@ a { color: inherit; }
 
 .featured-carousel.is-dragging {
   cursor: grabbing;
+  touch-action: none;
 }
 
 .featured-track {
@@ -446,6 +448,13 @@ a { color: inherit; }
   will-change: transform;
   padding: 0 24px;
   transform: translate3d(0, 0, 0);
+}
+
+.featured-track .featured-card,
+.featured-track img,
+.featured-track video {
+  -webkit-user-drag: none;
+  user-drag: none;
 }
 
 .featured-track .featured-card {

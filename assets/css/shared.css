@@ -425,19 +425,17 @@ a { color: inherit; }
 }
 
 .featured-carousel {
-  overflow-x: auto;
-  overflow-y: hidden;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior-x: contain;
-  touch-action: pan-x;
-  scrollbar-width: none;
+  overflow: hidden;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
   -webkit-mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent);
   mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent);
   padding: 6px 0 10px;
 }
 
-.featured-carousel::-webkit-scrollbar {
-  display: none;
+.featured-carousel.is-dragging {
+  cursor: grabbing;
 }
 
 .featured-track {
@@ -445,7 +443,9 @@ a { color: inherit; }
   align-items: stretch;
   gap: 18px;
   width: max-content;
+  will-change: transform;
   padding: 0 24px;
+  transform: translate3d(0, 0, 0);
 }
 
 .featured-track .featured-card {
@@ -515,6 +515,10 @@ a { color: inherit; }
   scrollbar-width: thin;
 }
 
+.featured-carousel--static .featured-track {
+  transform: none !important;
+}
+
 .featured-carousel--static .featured-card {
   scroll-snap-align: start;
 }
@@ -531,6 +535,10 @@ a { color: inherit; }
     -webkit-mask-image: none;
     mask-image: none;
     scroll-snap-type: x mandatory;
+  }
+
+  .featured-carousel:not(.featured-carousel--static) .featured-track {
+    transform: none !important;
   }
 
   .featured-carousel:not(.featured-carousel--static) .featured-card {

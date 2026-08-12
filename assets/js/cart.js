@@ -294,6 +294,7 @@ function initCart() {
   document.addEventListener('click', (e) => {
     const addBtn = e.target.closest('.add-to-cart-btn[data-product-id]');
     if (addBtn) {
+      if (addBtn.dataset.dragged === 'true') return;
       e.preventDefault();
       addToCart(addBtn.dataset.productId);
       return;

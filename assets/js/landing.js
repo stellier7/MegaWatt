@@ -68,6 +68,8 @@ function initAutoCarousel(track, carousel, options = {}) {
 
   const speed = options.speed ?? 0.55;
   const staticClass = options.staticClass ?? 'auto-carousel--static';
+  const axisThreshold = 8;
+  const dragResumeDelay = 600;
 
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (reducedMotion) {
@@ -75,64 +77,129 @@ function initAutoCarousel(track, carousel, options = {}) {
     return;
   }
 
+  let offset = 0;
   let paused = false;
   let inView = true;
   let loopWidth = 0;
   let rafId = 0;
-  let isAutoScrolling = false;
-  let scrollEndTimer = 0;
+  let resumeTimer = 0;
+
+  let isDragging = false;
+  let axis = null;
+  let startX = 0;
+  let startY = 0;
+  let startOffset = 0;
+  let moved = 0;
+
+  const applyTransform = () => {
+    track.style.transform = `translate3d(-${offset}px, 0, 0)`;
+  };
+
+  const readCurrentOffset = () => {
+    const transform = window.getComputedStyle(track).transform;
+    if (!transform || transform === 'none') return offset;
+    return -new DOMMatrix(transform).m41;
+  };
 
   const measure = () => {
     loopWidth = track.scrollWidth / 2;
-    if (loopWidth > 0 && carousel.scrollLeft >= loopWidth) {
-      carousel.scrollLeft -= loopWidth;
-    }
+    if (loopWidth > 0) offset %= loopWidth;
   };
 
-  const normalizeScroll = () => {
+  const normalizeOffset = () => {
     if (loopWidth <= 0) return;
-    while (carousel.scrollLeft >= loopWidth) {
-      carousel.scrollLeft -= loopWidth;
-    }
+    while (offset >= loopWidth) offset -= loopWidth;
+    while (offset < 0) offset += loopWidth;
+    applyTransform();
   };
 
   const pause = () => {
     paused = true;
   };
+
   const resume = () => {
     paused = false;
   };
 
-  const pauseForUserScroll = () => {
-    pause();
-    window.clearTimeout(scrollEndTimer);
-    scrollEndTimer = window.setTimeout(resume, 900);
+  const scheduleResume = () => {
+    window.clearTimeout(resumeTimer);
+    resumeTimer = window.setTimeout(resume, dragResumeDelay);
   };
 
   if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
     carousel.addEventListener('mouseenter', pause);
-    carousel.addEventListener('mouseleave', resume);
+    carousel.addEventListener('mouseleave', () => {
+      if (!isDragging) resume();
+    });
   }
 
-  carousel.addEventListener('touchstart', pauseForUserScroll, { passive: true });
-  carousel.addEventListener(
-    'scroll',
-    () => {
-      if (isAutoScrolling) return;
-      pauseForUserScroll();
-      normalizeScroll();
-    },
-    { passive: true }
-  );
+  const onPointerDown = (e) => {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    isDragging = false;
+    axis = null;
+    moved = 0;
+    startX = e.clientX;
+    startY = e.clientY;
+    startOffset = readCurrentOffset();
+    offset = startOffset;
+  };
+
+  const onPointerMove = (e) => {
+    if (axis === null) {
+      const dx = Math.abs(e.clientX - startX);
+      const dy = Math.abs(e.clientY - startY);
+      if (dx < axisThreshold && dy < axisThreshold) return;
+      axis = dx > dy ? 'x' : 'y';
+      if (axis === 'y') return;
+      isDragging = true;
+      pause();
+      carousel.classList.add('is-dragging');
+      carousel.setPointerCapture(e.pointerId);
+    }
+
+    if (axis === 'y' || !isDragging) return;
+
+    const delta = e.clientX - startX;
+    moved = Math.max(moved, Math.abs(delta));
+    offset = startOffset - delta;
+    applyTransform();
+  };
+
+  const onPointerUp = (e) => {
+    if (isDragging) {
+      isDragging = false;
+      carousel.classList.remove('is-dragging');
+      if (carousel.hasPointerCapture?.(e.pointerId)) {
+        carousel.releasePointerCapture(e.pointerId);
+      }
+      normalizeOffset();
+
+      carousel.querySelectorAll('.add-to-cart-btn').forEach((btn) => {
+        btn.dataset.dragged = moved > 10 ? 'true' : 'false';
+        if (moved > 10) {
+          window.setTimeout(() => {
+            btn.dataset.dragged = 'false';
+          }, 0);
+        }
+      });
+
+      if (moved > 10) scheduleResume();
+      else resume();
+    }
+
+    axis = null;
+  };
+
+  carousel.addEventListener('pointerdown', onPointerDown);
+  carousel.addEventListener('pointermove', onPointerMove);
+  carousel.addEventListener('pointerup', onPointerUp);
+  carousel.addEventListener('pointercancel', onPointerUp);
 
   const tick = () => {
     if (!paused && inView && loopWidth > 0) {
-      isAutoScrolling = true;
-      carousel.scrollLeft += speed;
-      if (carousel.scrollLeft >= loopWidth) {
-        carousel.scrollLeft -= loopWidth;
-      }
-      isAutoScrolling = false;
+      offset += speed;
+      if (offset >= loopWidth) offset -= loopWidth;
+      applyTransform();
     }
     rafId = requestAnimationFrame(tick);
   };

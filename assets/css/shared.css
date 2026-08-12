@@ -1301,6 +1301,23 @@ footer {
   color: var(--steel);
 }
 
+.foot-credit {
+  margin-top: 12px;
+  font-size: 10.5px;
+  color: var(--steel);
+  text-align: center;
+}
+
+.foot-credit a {
+  color: var(--steel-light);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.foot-credit a:hover {
+  color: var(--orange);
+}
+
 .reveal {
   opacity: 0;
   transform: translateY(24px);

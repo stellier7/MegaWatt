@@ -59,7 +59,7 @@ const SELLERS = {
   santiago: {
     name: 'Santiago',
     firstName: 'Santiago',
-    whatsapp: '50496784678',
+    whatsapp: '50496784674',
   },
 };
 

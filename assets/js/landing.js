@@ -75,15 +75,25 @@ function initAutoCarousel(track, carousel, options = {}) {
     return;
   }
 
-  let offset = 0;
   let paused = false;
   let inView = true;
   let loopWidth = 0;
   let rafId = 0;
+  let isAutoScrolling = false;
+  let scrollEndTimer = 0;
 
   const measure = () => {
     loopWidth = track.scrollWidth / 2;
-    if (loopWidth > 0) offset %= loopWidth;
+    if (loopWidth > 0 && carousel.scrollLeft >= loopWidth) {
+      carousel.scrollLeft -= loopWidth;
+    }
+  };
+
+  const normalizeScroll = () => {
+    if (loopWidth <= 0) return;
+    while (carousel.scrollLeft >= loopWidth) {
+      carousel.scrollLeft -= loopWidth;
+    }
   };
 
   const pause = () => {
@@ -93,32 +103,36 @@ function initAutoCarousel(track, carousel, options = {}) {
     paused = false;
   };
 
+  const pauseForUserScroll = () => {
+    pause();
+    window.clearTimeout(scrollEndTimer);
+    scrollEndTimer = window.setTimeout(resume, 900);
+  };
+
   if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
     carousel.addEventListener('mouseenter', pause);
     carousel.addEventListener('mouseleave', resume);
   }
 
+  carousel.addEventListener('touchstart', pauseForUserScroll, { passive: true });
   carousel.addEventListener(
-    'touchstart',
+    'scroll',
     () => {
-      paused = true;
+      if (isAutoScrolling) return;
+      pauseForUserScroll();
+      normalizeScroll();
     },
     { passive: true }
   );
-  carousel.addEventListener(
-    'touchend',
-    () => {
-      window.setTimeout(resume, 400);
-    },
-    { passive: true }
-  );
-  carousel.addEventListener('touchcancel', resume, { passive: true });
 
   const tick = () => {
     if (!paused && inView && loopWidth > 0) {
-      offset += speed;
-      if (offset >= loopWidth) offset -= loopWidth;
-      track.style.transform = `translate3d(-${offset}px, 0, 0)`;
+      isAutoScrolling = true;
+      carousel.scrollLeft += speed;
+      if (carousel.scrollLeft >= loopWidth) {
+        carousel.scrollLeft -= loopWidth;
+      }
+      isAutoScrolling = false;
     }
     rafId = requestAnimationFrame(tick);
   };

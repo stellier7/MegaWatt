@@ -20,6 +20,7 @@ Studio shots cropped from the MegaWatt PDF. The catalog finder uses these instea
 ```
 bombillo-smd.jpeg
 bombillo-alta-potencia.jpeg
+bombillo-alta-potencia-full.jpeg
 bombillo-industrial.jpeg
 panel-slim-redondo.jpeg
 panel-slim-cuadrado.jpeg

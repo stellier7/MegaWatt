@@ -1,5 +1,5 @@
-// Catalog finder follows the official MegaWatt PDF:
-// pick línea → serie / forma if needed → potencia, then reveal one SKU.
+// Catalog finder: seven family dropdowns from the MegaWatt PDF.
+// Open a type, pick watts (and shape when needed), then the studio shot + ficha appear.
 // Photos are studio crops from the PDF (one shot per series, not packaging).
 const img = (file) => (file ? `assets/images/${file}` : '');
 
@@ -30,6 +30,7 @@ const catalogSections = [
       {
         id: 'skba',
         kicker: 'SKBA · 7W a 18W',
+        menuLabel: 'Bombillos SMD',
         finderLabel: 'SMD Tipo A · 7–18W',
         title: 'Bombillo LED SMD · Tipo A',
         blurb: 'Driver DOB integrado, sin parpadeo y opción de chip SAMSUNG. Uso general en interiores.',
@@ -37,6 +38,7 @@ const catalogSections = [
       {
         id: 'skbt',
         kicker: 'SKBT · 20W a 60W',
+        menuLabel: 'Alta potencia',
         finderLabel: 'Alta potencia · 20–60W',
         title: 'Bombillo LED alta potencia · Serie T',
         blurb: 'Cuerpo de plástico térmico + aluminio para mayor disipación. Ideal para bodegas, talleres y áreas amplias.',
@@ -44,6 +46,7 @@ const catalogSections = [
       {
         id: 'skbta',
         kicker: 'SKBTA · 70W a 100W',
+        menuLabel: 'Industrial',
         finderLabel: 'Industrial · 70–100W',
         title: 'Bombillo LED industrial · aluminio fundido',
         blurb: 'Carcasa die-cast de máxima disipación, con protección contra sobretensión opcional. Para naves industriales.',
@@ -61,6 +64,7 @@ const catalogSections = [
       {
         id: 'skrf205',
         kicker: 'SKRF205 · 3W a 18W',
+        menuLabel: 'Empotrable slim',
         finderLabel: 'Slim · 3–18W',
         title: 'Panel LED empotrable · slim',
         blurb: 'Plafón ultradelgado (< 25 mm) con driver DOB integrado y carcasa PP ignífuga. Redondo (SKRF205R) y cuadrado (SKRF205S).',
@@ -68,6 +72,7 @@ const catalogSections = [
       {
         id: 'skrp',
         kicker: 'SKRP24 / 25 · 3+3W a 18+6W',
+        menuLabel: 'Empotrable bicolor',
         finderLabel: 'Bicolor · 3+3 a 18+6W',
         title: 'Panel LED de techo · bicolor',
         blurb: 'Luz principal y borde decorativo de color. Redondo (SKRP24) y cuadrado (SKRP25). El segundo wattage es el borde.',
@@ -85,6 +90,7 @@ const catalogSections = [
       {
         id: 'sknm04',
         kicker: 'SKNM04 · 20W a 40W',
+        menuLabel: 'Emergencia',
         finderLabel: 'Recargable · 20–40W',
         title: 'Bombillo LED de emergencia · recargable',
         blurb: 'Disponible en 20W, 30W y 40W. Luz cálida, neutra o fría. Entrada USB 5V.',
@@ -102,6 +108,7 @@ const catalogSections = [
       {
         id: 'skpl2401',
         kicker: 'SKPL2401 · 150W a 200W',
+        menuLabel: 'Alumbrado público',
         finderLabel: 'Vial · 150–200W',
         title: 'Luminaria LED · alumbrado público',
         blurb: 'Cuerpo de aluminio con disipación optimizada. Factor de potencia > 0.9.',
@@ -302,16 +309,11 @@ function wattSortValue(value) {
   return Number(nums[0]) + (nums[1] ? Number(nums[1]) / 100 : 0);
 }
 
-const lineaOptions = [LINEA.bombillos, LINEA.empotrables, LINEA.emergencia, LINEA.calle];
-
 const catalogState = {
-  linea: '',
-  group: '',
-  shape: '',
-  watt: '',
+  productId: '',
 };
 
-const PLACEHOLDER = 'Elegir';
+const PLACEHOLDER = 'Elegir watts';
 
 function isVideoPath(path) {
   return /\.(mp4|webm|mov)$/i.test(path || '');
@@ -403,98 +405,39 @@ function refreshProductCardButtons() {
   });
 }
 
-function sectionForLinea(linea) {
-  return catalogSections.find((section) => section.linea === linea) || null;
+function finderFamilies() {
+  return catalogSections.flatMap((section) =>
+    section.groups.map((group) => ({
+      ...group,
+      linea: section.linea,
+    }))
+  );
 }
 
 function groupMeta(groupId) {
-  for (const section of catalogSections) {
-    const group = section.groups.find((entry) => entry.id === groupId);
-    if (group) return group;
+  return finderFamilies().find((group) => group.id === groupId) || null;
+}
+
+function productsInGroup(groupId) {
+  return products
+    .filter((p) => p.group === groupId)
+    .sort((a, b) => {
+      const watt = wattSortValue(a.potencia) - wattSortValue(b.potencia);
+      if (watt !== 0) return watt;
+      return String(a.forma).localeCompare(String(b.forma));
+    });
+}
+
+function skuOptionLabel(product) {
+  if (product.forma && product.forma !== '—' && product.forma !== 'Focos') {
+    return `${product.potencia} · ${product.forma}`;
   }
-  return null;
-}
-
-function matchingProducts({ linea, group, shape, watt } = catalogState) {
-  return products.filter((p) => {
-    if (linea && p.linea !== linea) return false;
-    if (group && p.group !== group) return false;
-    if (shape && p.forma !== shape) return false;
-    if (watt && p.potencia !== watt) return false;
-    return true;
-  });
-}
-
-function uniqueSorted(values, sortFn) {
-  const unique = Array.from(new Set(values.filter(Boolean)));
-  return sortFn ? unique.sort(sortFn) : unique;
-}
-
-function groupsForLinea(linea) {
-  const section = sectionForLinea(linea);
-  return section ? section.groups : [];
-}
-
-function needsGroupStep() {
-  return groupsForLinea(catalogState.linea).length > 1;
-}
-
-function availableShapes() {
-  return uniqueSorted(
-    matchingProducts({
-      linea: catalogState.linea,
-      group: catalogState.group,
-      shape: '',
-      watt: '',
-    })
-      .map((p) => p.forma)
-      .filter((forma) => forma && forma !== '—' && forma !== 'Focos')
-  );
-}
-
-function needsShapeStep() {
-  if (!catalogState.group) return false;
-  return availableShapes().length > 1;
-}
-
-function wattReady() {
-  if (!catalogState.linea) return false;
-  if (needsGroupStep() && !catalogState.group) return false;
-  if (needsShapeStep() && !catalogState.shape) return false;
-  return true;
-}
-
-function availableWatts() {
-  if (!wattReady()) return [];
-  return uniqueSorted(
-    matchingProducts({
-      linea: catalogState.linea,
-      group: catalogState.group,
-      shape: catalogState.shape,
-      watt: '',
-    }).map((p) => p.potencia),
-    (a, b) => wattSortValue(a) - wattSortValue(b)
-  );
+  return product.potencia;
 }
 
 function selectedProduct() {
-  if (!wattReady() || !catalogState.watt) return null;
-  const matches = matchingProducts(catalogState);
-  return matches.length === 1 ? matches[0] : null;
-}
-
-function previewImage() {
-  const product = selectedProduct();
-  if (product) return product.image;
-
-  if (catalogState.group && catalogState.shape) {
-    return img(studioForSpot(catalogState.group, catalogState.shape));
-  }
-  if (catalogState.group && GROUP_STUDIO[catalogState.group]) {
-    return img(GROUP_STUDIO[catalogState.group]);
-  }
-  const section = sectionForLinea(catalogState.linea);
-  return section ? section.image : '';
+  if (!catalogState.productId) return null;
+  return products.find((p) => p.id === catalogState.productId) || null;
 }
 
 function specRows(product) {
@@ -515,35 +458,14 @@ function specRows(product) {
 
 function finderStageHtml() {
   const product = selectedProduct();
-  const photo = previewImage();
-  const group = groupMeta(catalogState.group);
-  const section = sectionForLinea(catalogState.linea);
+  const group = product ? groupMeta(product.group) : null;
 
-  if (!catalogState.linea) {
+  if (!product) {
     return `
       <div class="finder-empty">
         <div class="finder-empty-kicker">Cómo elegir</div>
-        <h3>Elige la línea, luego la potencia</h3>
-        <p>Igual que el catálogo de fábrica: primero el tipo de luminaria, después el wattage. La foto y la ficha aparecen cuando el modelo queda definido.</p>
-      </div>
-    `;
-  }
-
-  if (!product) {
-    const hint = !wattReady()
-      ? needsGroupStep() && !catalogState.group
-        ? 'Sigue con la serie para acotar el wattage.'
-        : 'Elige la forma para ver las potencias de ese plafón.'
-      : 'Ahora sí: elige los watts y sale el modelo exacto.';
-    return `
-      <div class="finder-result is-pending">
-        <div class="finder-photo">${photo ? `<img src="${photo}" alt="">` : ''}</div>
-        <div class="finder-copy">
-          <div class="p-cat">${group ? group.kicker : section.eyebrow}</div>
-          <h3>${group ? group.title : section.title}</h3>
-          <p>${group ? group.blurb : section.intro}</p>
-          <p class="finder-hint">${hint}</p>
-        </div>
+        <h3>Abre una categoría y elige los watts</h3>
+        <p>Siete tipos, como en el catálogo de fábrica. Cada menú trae solo las potencias de esa línea. La foto de estudio y la ficha salen al elegir el modelo.</p>
       </div>
     `;
   }
@@ -568,98 +490,46 @@ function finderStageHtml() {
   `;
 }
 
-function optionListHtml(options, selected, emptyLabel) {
-  if (!options.length) {
-    return `<li><span class="filter-dropdown-empty">${emptyLabel}</span></li>`;
-  }
-  return options
+function familyDropdownHtml(group) {
+  const selected = selectedProduct();
+  const active = selected && selected.group === group.id;
+  const triggerLabel = active ? skuOptionLabel(selected) : PLACEHOLDER;
+  const items = productsInGroup(group.id);
+  const useGrid = items.length > 4 && items.every((p) => p.forma === 'Focos' || p.forma === '—');
+  const options = items
     .map(
-      (option) => `
-      <li>
-        <button
-          type="button"
-          class="filter-dropdown-option${selected === option.value ? ' is-selected' : ''}"
-          role="option"
-          aria-selected="${selected === option.value}"
-          data-value="${option.value}"
-        >${option.label}</button>
-      </li>`
+      (product) => `
+        <li>
+          <button
+            type="button"
+            class="filter-dropdown-option${selected && selected.id === product.id ? ' is-selected' : ''}"
+            role="option"
+            aria-selected="${Boolean(selected && selected.id === product.id)}"
+            data-product-id="${product.id}"
+          >${skuOptionLabel(product)}</button>
+        </li>`
     )
     .join('');
-}
 
-function setDropdownEnabled(dropdown, enabled, valueText) {
-  const trigger = dropdown.querySelector('.filter-dropdown-trigger');
-  const valueEl = dropdown.querySelector('.filter-dropdown-value');
-  dropdown.classList.toggle('is-disabled', !enabled);
-  if (trigger) {
-    trigger.disabled = !enabled;
-    trigger.setAttribute('aria-disabled', String(!enabled));
-  }
-  if (valueEl) valueEl.textContent = valueText;
+  return `
+    <div class="filter-group finder-family${active ? ' is-active' : ''}" data-group="${group.id}">
+      <span class="fg-label">${group.menuLabel}</span>
+      <div class="filter-dropdown${useGrid ? ' is-watt-grid' : ''}" data-group="${group.id}"${useGrid ? ' data-layout="grid"' : ''}>
+        <button type="button" class="filter-dropdown-trigger" aria-haspopup="listbox" aria-expanded="false">
+          <span class="filter-dropdown-value">${triggerLabel}</span>
+        </button>
+        <div class="filter-dropdown-panel" hidden>
+          <ul class="filter-dropdown-list${useGrid ? ' filter-dropdown-list--grid' : ''}" role="listbox">${options}</ul>
+        </div>
+      </div>
+    </div>
+  `;
 }
 
 function renderFinderDropdowns() {
-  const lineaDrop = document.getElementById('lineaFilter');
-  const groupDrop = document.getElementById('groupFilter');
-  const shapeDrop = document.getElementById('shapeFilter');
-  const wattDrop = document.getElementById('wattFilter');
-  const groupStep = document.getElementById('groupStep');
-  const shapeStep = document.getElementById('shapeStep');
-  if (!lineaDrop || !wattDrop) return;
-
-  const lineaList = lineaDrop.querySelector('.filter-dropdown-list');
-  lineaList.innerHTML = optionListHtml(
-    lineaOptions.map((linea) => ({ value: linea, label: linea })),
-    catalogState.linea
-  );
-  setDropdownEnabled(lineaDrop, true, catalogState.linea || PLACEHOLDER);
-
-  const showGroup = needsGroupStep();
-  if (groupStep) groupStep.hidden = !showGroup;
-  if (groupDrop) {
-    const groups = groupsForLinea(catalogState.linea);
-    const list = groupDrop.querySelector('.filter-dropdown-list');
-    if (list) {
-      list.innerHTML = optionListHtml(
-        groups.map((group) => ({ value: group.id, label: group.finderLabel })),
-        catalogState.group,
-        'Elige primero la línea'
-      );
-    }
-    const selectedGroup = groupMeta(catalogState.group);
-    setDropdownEnabled(
-      groupDrop,
-      Boolean(catalogState.linea && showGroup),
-      selectedGroup ? selectedGroup.finderLabel : PLACEHOLDER
-    );
-  }
-
-  const showShape = Boolean(catalogState.linea) && needsShapeStep();
-  if (shapeStep) shapeStep.hidden = !showShape;
-  if (shapeDrop) {
-    const list = shapeDrop.querySelector('.filter-dropdown-list');
-    const shapes = availableShapes();
-    if (list) {
-      list.innerHTML = optionListHtml(
-        shapes.map((shape) => ({ value: shape, label: shape })),
-        catalogState.shape,
-        'Elige primero la serie'
-      );
-    }
-    setDropdownEnabled(shapeDrop, showShape, catalogState.shape || PLACEHOLDER);
-  }
-
-  const watts = availableWatts();
-  const wattList = wattDrop.querySelector('.filter-dropdown-list');
-  wattDrop.dataset.layout = watts.length > 4 ? 'grid' : '';
-  wattList.classList.toggle('filter-dropdown-list--grid', watts.length > 4);
-  wattList.innerHTML = optionListHtml(
-    watts.map((watt) => ({ value: watt, label: watt })),
-    catalogState.watt,
-    'Completa los pasos anteriores'
-  );
-  setDropdownEnabled(wattDrop, wattReady(), catalogState.watt || PLACEHOLDER);
+  const root = document.getElementById('finderFamilies');
+  if (!root) return;
+  root.innerHTML = finderFamilies().map(familyDropdownHtml).join('');
 }
 
 function closeAllFilterDropdowns() {
@@ -673,7 +543,6 @@ function closeAllFilterDropdowns() {
 }
 
 function openFilterDropdown(dropdown) {
-  if (dropdown.classList.contains('is-disabled')) return;
   closeAllFilterDropdowns();
   const trigger = dropdown.querySelector('.filter-dropdown-trigger');
   const panel = dropdown.querySelector('.filter-dropdown-panel');
@@ -682,22 +551,8 @@ function openFilterDropdown(dropdown) {
   if (panel) panel.hidden = false;
 }
 
-function setFinderValue(key, value) {
-  catalogState[key] = value;
-  if (key === 'linea') {
-    catalogState.group = '';
-    catalogState.shape = '';
-    catalogState.watt = '';
-    const groups = groupsForLinea(value);
-    if (groups.length === 1) catalogState.group = groups[0].id;
-  }
-  if (key === 'group') {
-    catalogState.shape = '';
-    catalogState.watt = '';
-  }
-  if (key === 'shape') {
-    catalogState.watt = '';
-  }
+function selectFinderProduct(productId) {
+  catalogState.productId = productId;
   renderFinder();
 }
 
@@ -711,40 +566,31 @@ function renderFinder() {
 }
 
 function resetFinder() {
-  catalogState.linea = '';
-  catalogState.group = '';
-  catalogState.shape = '';
-  catalogState.watt = '';
+  catalogState.productId = '';
   renderFinder();
 }
 
 function initFilterDropdowns() {
-  const dropdowns = document.querySelectorAll('.filter-dropdown');
-  if (!dropdowns.length) return;
+  const bar = document.getElementById('finderFamilies');
+  if (!bar) return;
 
-  dropdowns.forEach((dropdown) => {
-    const trigger = dropdown.querySelector('.filter-dropdown-trigger');
-    const list = dropdown.querySelector('.filter-dropdown-list');
-    if (!trigger || !list) return;
+  bar.addEventListener('click', (e) => {
+    const option = e.target.closest('.filter-dropdown-option');
+    if (option) {
+      e.preventDefault();
+      selectFinderProduct(option.dataset.productId);
+      return;
+    }
 
-    trigger.addEventListener('click', () => {
-      if (dropdown.classList.contains('is-disabled')) return;
-      if (dropdown.classList.contains('open')) {
-        closeAllFilterDropdowns();
-      } else {
-        openFilterDropdown(dropdown);
-      }
-    });
-
-    list.addEventListener('click', (e) => {
-      const option = e.target.closest('.filter-dropdown-option');
-      if (!option) return;
-      const key = dropdown.dataset.filterKey;
-      if (!key) return;
-      setFinderValue(key, option.dataset.value);
+    const trigger = e.target.closest('.filter-dropdown-trigger');
+    if (!trigger) return;
+    const dropdown = trigger.closest('.filter-dropdown');
+    if (!dropdown) return;
+    if (dropdown.classList.contains('open')) {
       closeAllFilterDropdowns();
-      trigger.focus();
-    });
+    } else {
+      openFilterDropdown(dropdown);
+    }
   });
 
   document.getElementById('finderReset')?.addEventListener('click', resetFinder);

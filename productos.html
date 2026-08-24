@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Catálogo — MEGAWATT</title>
-  <meta name="description" content="Catálogo MegaWatt: elige la línea y los watts para ver bombillos, empotrables, emergencia y alumbrado público. Distribuidor en Comayagua, Honduras.">
+  <meta name="description" content="Catálogo MegaWatt: abre bombillos, empotrables, emergencia o alumbrado público y elige los watts. Distribuidor en Comayagua, Honduras.">
   <link rel="icon" href="assets/images/logo.jpeg" type="image/jpeg">
   <link rel="apple-touch-icon" href="assets/images/logo.jpeg">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Catálogo — MEGAWATT">
-  <meta property="og:description" content="Catálogo MegaWatt: elige la línea y los watts para ver bombillos, empotrables, emergencia y alumbrado público. Distribuidor en Comayagua, Honduras.">
+  <meta property="og:description" content="Catálogo MegaWatt: abre bombillos, empotrables, emergencia o alumbrado público y elige los watts. Distribuidor en Comayagua, Honduras.">
   <meta property="og:image" content="https://mega-watt-wheat.vercel.app/assets/images/logo.jpeg">
   <meta property="og:url" content="https://mega-watt-wheat.vercel.app/productos.html">
   <meta property="og:locale" content="es_HN">
@@ -24,56 +24,13 @@
     <a class="back-link" href="index.html" id="backLink">← Volver al inicio</a>
     <div class="section-head">
       <h2>Catálogo de productos</h2>
-      <p>Elige la línea, la serie y los watts — como en el catálogo oficial. El modelo, la foto de estudio y la ficha aparecen cuando la selección queda cerrada.</p>
+      <p>Siete categorías, como en el catálogo oficial. Abre el tipo de luminaria, elige los watts, y ves la foto de estudio con la ficha.</p>
     </div>
   </div>
 
   <div class="container finder-wrap">
     <div class="filters finder-bar">
-      <div class="filter-group" id="lineaStep">
-        <span class="fg-label" id="lineaFilterLabel">Línea</span>
-        <div class="filter-dropdown" id="lineaFilter" data-filter-key="linea">
-          <button type="button" class="filter-dropdown-trigger" id="lineaFilterTrigger" aria-labelledby="lineaFilterLabel" aria-haspopup="listbox" aria-expanded="false">
-            <span class="filter-dropdown-value">Elegir</span>
-          </button>
-          <div class="filter-dropdown-panel" hidden>
-            <ul class="filter-dropdown-list" role="listbox" aria-labelledby="lineaFilterLabel"></ul>
-          </div>
-        </div>
-      </div>
-      <div class="filter-group" id="groupStep" hidden>
-        <span class="fg-label" id="groupFilterLabel">Serie</span>
-        <div class="filter-dropdown" id="groupFilter" data-filter-key="group">
-          <button type="button" class="filter-dropdown-trigger" id="groupFilterTrigger" aria-labelledby="groupFilterLabel" aria-haspopup="listbox" aria-expanded="false">
-            <span class="filter-dropdown-value">Elegir</span>
-          </button>
-          <div class="filter-dropdown-panel" hidden>
-            <ul class="filter-dropdown-list" role="listbox" aria-labelledby="groupFilterLabel"></ul>
-          </div>
-        </div>
-      </div>
-      <div class="filter-group" id="shapeStep" hidden>
-        <span class="fg-label" id="shapeFilterLabel">Forma</span>
-        <div class="filter-dropdown" id="shapeFilter" data-filter-key="shape">
-          <button type="button" class="filter-dropdown-trigger" id="shapeFilterTrigger" aria-labelledby="shapeFilterLabel" aria-haspopup="listbox" aria-expanded="false">
-            <span class="filter-dropdown-value">Elegir</span>
-          </button>
-          <div class="filter-dropdown-panel" hidden>
-            <ul class="filter-dropdown-list" role="listbox" aria-labelledby="shapeFilterLabel"></ul>
-          </div>
-        </div>
-      </div>
-      <div class="filter-group" id="wattStep">
-        <span class="fg-label" id="wattFilterLabel">Potencia</span>
-        <div class="filter-dropdown" id="wattFilter" data-filter-key="watt">
-          <button type="button" class="filter-dropdown-trigger" id="wattFilterTrigger" aria-labelledby="wattFilterLabel" aria-haspopup="listbox" aria-expanded="false">
-            <span class="filter-dropdown-value">Elegir</span>
-          </button>
-          <div class="filter-dropdown-panel" hidden>
-            <ul class="filter-dropdown-list" role="listbox" aria-labelledby="wattFilterLabel"></ul>
-          </div>
-        </div>
-      </div>
+      <div class="finder-families" id="finderFamilies"></div>
       <button type="button" class="finder-reset" id="finderReset">Empezar de nuevo</button>
     </div>
     <div id="productStage" class="finder-stage"></div>

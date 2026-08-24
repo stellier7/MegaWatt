@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Catálogo — MEGAWATT</title>
-  <meta name="description" content="Catálogo MegaWatt: focos LED, spots, luminarias de calle y emergencia. Filtra por potencia y aplicación — o sé distribuidor en Comayagua, Honduras.">
+  <meta name="description" content="Catálogo MegaWatt: bombillos LED, empotrables, emergencia y alumbrado público. Filtra por línea, potencia y forma — o sé distribuidor en Comayagua, Honduras.">
   <link rel="icon" href="assets/images/logo.jpeg" type="image/jpeg">
   <link rel="apple-touch-icon" href="assets/images/logo.jpeg">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Catálogo — MEGAWATT">
-  <meta property="og:description" content="Catálogo MegaWatt: focos LED, spots, luminarias de calle y emergencia. Filtra por potencia y aplicación — o sé distribuidor en Comayagua, Honduras.">
+  <meta property="og:description" content="Catálogo MegaWatt: bombillos LED, empotrables, emergencia y alumbrado público. Filtra por línea, potencia y forma — o sé distribuidor en Comayagua, Honduras.">
   <meta property="og:image" content="https://mega-watt-wheat.vercel.app/assets/images/logo.jpeg">
   <meta property="og:url" content="https://mega-watt-wheat.vercel.app/productos.html">
   <meta property="og:locale" content="es_HN">
@@ -24,7 +24,7 @@
     <a class="back-link" href="index.html" id="backLink">← Volver al inicio</a>
     <div class="section-head">
       <h2>Catálogo de productos</h2>
-      <p>Filtra por tipo de espacio, potencia o forma. Las fotos reales se irán agregando — por ahora, cada espacio pendiente está marcado.</p>
+      <p>Organizado como el catálogo oficial MegaWatt: bombillos, empotrables, emergencia y alumbrado público. Filtra por línea, potencia o forma.</p>
     </div>
   </div>
 
@@ -53,18 +53,18 @@
         </div>
       </div>
       <div class="filter-group">
-        <span class="fg-label" id="appFilterLabel">Aplicación</span>
-        <div class="filter-dropdown" id="appFilter" data-filter-key="app">
-          <button type="button" class="filter-dropdown-trigger" id="appFilterTrigger" aria-labelledby="appFilterLabel" aria-haspopup="listbox" aria-expanded="false">
+        <span class="fg-label" id="lineaFilterLabel">Línea</span>
+        <div class="filter-dropdown" id="lineaFilter" data-filter-key="linea">
+          <button type="button" class="filter-dropdown-trigger" id="lineaFilterTrigger" aria-labelledby="lineaFilterLabel" aria-haspopup="listbox" aria-expanded="false">
             <span class="filter-dropdown-value">Todas</span>
           </button>
           <div class="filter-dropdown-panel" hidden>
-            <ul class="filter-dropdown-list" role="listbox" aria-labelledby="appFilterLabel"></ul>
+            <ul class="filter-dropdown-list" role="listbox" aria-labelledby="lineaFilterLabel"></ul>
           </div>
         </div>
       </div>
     </div>
-    <div class="grid" id="productGrid"></div>
+    <div id="productCatalog"></div>
     <div class="empty-note" id="emptyNote" style="display:none;">No hay productos con esos filtros todavía.</div>
   </div>
 

@@ -13,6 +13,22 @@ emergencia.mov or .mp4
 logo.jpeg
 ```
 
+## Official catalog crops (`assets/images/catalog/`)
+
+Studio shots cropped from the MegaWatt PDF. Used as section art and as product photos when a unique packaging shot is not available.
+
+```
+bombillo-smd.jpeg
+bombillo-alta-potencia.jpeg
+bombillo-industrial.jpeg
+panel-slim-redondo.jpeg
+panel-slim-cuadrado.jpeg
+panel-bicolor-redondo.jpeg
+panel-bicolor-cuadrado.jpeg
+emergencia.jpeg
+street-light.jpeg
+```
+
 ## Gallery (`assets/images/gallery/`)
 
 ```
@@ -26,6 +42,7 @@ Videos autoplay muted in the homepage gallery carousel. `.mov` works best in Saf
 
 Street lights and interior focos **7W–18W** use **9:16**.
 Focos **20W–100W** use **5:7**.
+Studio catalog crops use **contain** inside the card.
 Other products use **1:1** (square).
 
 ## Note on video

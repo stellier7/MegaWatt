@@ -108,7 +108,7 @@ function initAutoCarousel(track, carousel, options = {}) {
 
   const measure = () => {
     loopWidth = track.scrollWidth / 2;
-    if (loopWidth > 0) offset %= loopWidth;
+    normalizeOffset();
   };
 
   const normalizeOffset = () => {
@@ -194,6 +194,8 @@ function initAutoCarousel(track, carousel, options = {}) {
     lastTime = performance.now();
     startOffset = readCurrentOffset();
     offset = startOffset;
+    normalizeOffset();
+    startOffset = offset;
   };
 
   const onPointerMove = (e) => {
@@ -228,7 +230,8 @@ function initAutoCarousel(track, carousel, options = {}) {
 
     moved = Math.max(moved, absDx);
     offset = startOffset - dx;
-    applyTransform();
+    normalizeOffset();
+    startOffset = offset + dx;
   };
 
   const onPointerUp = (e) => {
@@ -269,8 +272,7 @@ function initAutoCarousel(track, carousel, options = {}) {
   const tick = () => {
     if (!paused && !momentumId && inView && loopWidth > 0) {
       offset += speed;
-      if (offset >= loopWidth) offset -= loopWidth;
-      applyTransform();
+      normalizeOffset();
     }
     rafId = requestAnimationFrame(tick);
   };

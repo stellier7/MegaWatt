@@ -1,6 +1,5 @@
-// Catalog finder: seven family dropdowns from the MegaWatt PDF.
-// Open a type, pick watts (and shape when needed), then the studio shot + ficha appear.
-// Photos are studio crops from the PDF (one shot per series, not packaging).
+// Catalog follows the MegaWatt PDF: three chapter cards that open into series,
+// then a studio shot and watt pills. Ceiling lights get a redondo/cuadrado toggle.
 const img = (file) => (file ? `assets/images/${file}` : '');
 
 const LINEA = {
@@ -54,12 +53,13 @@ const catalogSections = [
     ],
   },
   {
-    id: 'empotrables',
+    id: 'techo',
     linea: LINEA.empotrables,
-    eyebrow: 'Iluminación de techo',
-    title: 'Empotrables LED',
-    intro: 'Paneles slim y plafones bicolor, en versión redonda y cuadrada, con clips de instalación rápida.',
+    eyebrow: 'Spots',
+    title: 'Iluminación de techo',
+    intro: 'Paneles empotrables y plafones, en versión redonda y cuadrada.',
     image: img('catalog/panel-slim-redondo.jpeg'),
+    hasShapeToggle: true,
     groups: [
       {
         id: 'skrf205',
@@ -80,11 +80,11 @@ const catalogSections = [
     ],
   },
   {
-    id: 'emergencia',
+    id: 'especiales',
     linea: LINEA.emergencia,
-    eyebrow: 'Líneas especiales',
-    title: 'Emergencia',
-    intro: 'Bombillo recargable con batería interna y gancho integrado. Sigue iluminando durante cortes de energía.',
+    eyebrow: 'Emergencia · vial',
+    title: 'Líneas especiales',
+    intro: 'Bombillo recargable para cortes de energía y luminaria vial de alta eficacia.',
     image: img('catalog/emergencia.jpeg'),
     groups: [
       {
@@ -92,26 +92,16 @@ const catalogSections = [
         kicker: 'SKNM04 · 20W a 40W',
         menuLabel: 'Emergencia',
         finderLabel: 'Recargable · 20–40W',
-        title: 'Bombillo LED de emergencia · recargable',
-        blurb: 'Disponible en 20W, 30W y 40W. Luz cálida, neutra o fría. Entrada USB 5V.',
+        title: 'Bombillo LED de emergencia',
+        blurb: 'Recargable con batería interna y gancho integrado. Sigue iluminando durante cortes de energía. Luz cálida, neutra o fría.',
       },
-    ],
-  },
-  {
-    id: 'calle',
-    linea: LINEA.calle,
-    eyebrow: 'Líneas especiales',
-    title: 'Alumbrado público',
-    intro: 'Luminaria vial de alta eficacia (> 100 lm/W) para calles, avenidas y áreas exteriores.',
-    image: img('catalog/street-light.jpeg'),
-    groups: [
       {
         id: 'skpl2401',
         kicker: 'SKPL2401 · 150W a 200W',
         menuLabel: 'Alumbrado público',
         finderLabel: 'Vial · 150–200W',
         title: 'Luminaria LED · alumbrado público',
-        blurb: 'Cuerpo de aluminio con disipación optimizada. Factor de potencia > 0.9.',
+        blurb: 'Luminaria vial de alta eficacia (> 100 lm/W) para calles, avenidas y áreas exteriores. Cuerpo de aluminio.',
       },
     ],
   },
@@ -310,10 +300,11 @@ function wattSortValue(value) {
 }
 
 const catalogState = {
-  productId: '',
+  category: '',
+  series: '',
+  shape: 'Redondo',
+  watt: '',
 };
-
-const PLACEHOLDER = 'Elegir watts';
 
 function isVideoPath(path) {
   return /\.(mp4|webm|mov)$/i.test(path || '');
@@ -405,39 +396,38 @@ function refreshProductCardButtons() {
   });
 }
 
-function finderFamilies() {
-  return catalogSections.flatMap((section) =>
-    section.groups.map((group) => ({
-      ...group,
-      linea: section.linea,
-    }))
-  );
+function categoryMeta(categoryId) {
+  return catalogSections.find((section) => section.id === categoryId) || null;
 }
 
 function groupMeta(groupId) {
-  return finderFamilies().find((group) => group.id === groupId) || null;
+  for (const section of catalogSections) {
+    const group = section.groups.find((entry) => entry.id === groupId);
+    if (group) return { ...group, categoryId: section.id, hasShapeToggle: Boolean(section.hasShapeToggle) };
+  }
+  return null;
 }
 
-function productsInGroup(groupId) {
+function seriesImage(groupId, shape) {
+  if (groupId === 'skrf205' || groupId === 'skrp') {
+    return img(studioForSpot(groupId, shape || catalogState.shape));
+  }
+  return img(GROUP_STUDIO[groupId] || '');
+}
+
+function seriesProducts(groupId) {
+  const meta = groupMeta(groupId);
   return products
     .filter((p) => p.group === groupId)
-    .sort((a, b) => {
-      const watt = wattSortValue(a.potencia) - wattSortValue(b.potencia);
-      if (watt !== 0) return watt;
-      return String(a.forma).localeCompare(String(b.forma));
-    });
-}
-
-function skuOptionLabel(product) {
-  if (product.forma && product.forma !== '—' && product.forma !== 'Focos') {
-    return `${product.potencia} · ${product.forma}`;
-  }
-  return product.potencia;
+    .filter((p) => !meta?.hasShapeToggle || p.forma === catalogState.shape)
+    .sort((a, b) => wattSortValue(a.potencia) - wattSortValue(b.potencia));
 }
 
 function selectedProduct() {
-  if (!catalogState.productId) return null;
-  return products.find((p) => p.id === catalogState.productId) || null;
+  if (!catalogState.series || !catalogState.watt) return null;
+  return (
+    seriesProducts(catalogState.series).find((p) => p.potencia === catalogState.watt) || null
+  );
 }
 
 function specRows(product) {
@@ -456,157 +446,210 @@ function specRows(product) {
   return rows.filter(([, value]) => value);
 }
 
-function finderStageHtml() {
-  const product = selectedProduct();
-  const group = product ? groupMeta(product.group) : null;
-
-  if (!product) {
-    return `
-      <div class="finder-empty">
-        <div class="finder-empty-kicker">Cómo elegir</div>
-        <h3>Abre una categoría y elige los watts</h3>
-        <p>Siete tipos, como en el catálogo de fábrica. Cada menú trae solo las potencias de esa línea. La foto de estudio y la ficha salen al elegir el modelo.</p>
-      </div>
-    `;
-  }
-
-  const rows = specRows(product)
-    .map(([label, value]) => `<tr><th>${label}</th><td>${value}</td></tr>`)
-    .join('');
-
+function wattPillsHtml(items) {
   return `
-    <div class="finder-result">
-      <div class="finder-photo">${productPhotoHtml(product)}</div>
-      <div class="finder-copy">
-        <div class="p-cat">${product.subcategoria}</div>
-        <h3>${product.nombre}</h3>
-        <p>${group ? group.blurb : ''}</p>
-        <table class="finder-specs">
-          <tbody>${rows}</tbody>
-        </table>
-        ${addToCartButtonHtml(product)}
-      </div>
+    <div class="watt-pills" role="listbox" aria-label="Potencia">
+      ${items
+        .map(
+          (product) => `
+        <button
+          type="button"
+          class="watt-pill${catalogState.watt === product.potencia ? ' is-selected' : ''}"
+          data-watt="${product.potencia}"
+          aria-pressed="${catalogState.watt === product.potencia}"
+        >${product.potencia}</button>`
+        )
+        .join('')}
     </div>
   `;
 }
 
-function familyDropdownHtml(group) {
-  const selected = selectedProduct();
-  const active = selected && selected.group === group.id;
-  const triggerLabel = active ? skuOptionLabel(selected) : PLACEHOLDER;
-  const items = productsInGroup(group.id);
-  const useGrid = items.length > 4 && items.every((p) => p.forma === 'Focos' || p.forma === '—');
-  const options = items
-    .map(
-      (product) => `
-        <li>
+function shapeToggleHtml() {
+  return `
+    <div class="shape-toggle" role="group" aria-label="Forma">
+      <span class="shape-toggle-label">Forma</span>
+      <div class="shape-toggle-track">
+        ${['Redondo', 'Cuadrado']
+          .map(
+            (shape) => `
           <button
             type="button"
-            class="filter-dropdown-option${selected && selected.id === product.id ? ' is-selected' : ''}"
-            role="option"
-            aria-selected="${Boolean(selected && selected.id === product.id)}"
-            data-product-id="${product.id}"
-          >${skuOptionLabel(product)}</button>
-        </li>`
-    )
-    .join('');
-
-  return `
-    <div class="filter-group finder-family${active ? ' is-active' : ''}" data-group="${group.id}">
-      <span class="fg-label">${group.menuLabel}</span>
-      <div class="filter-dropdown${useGrid ? ' is-watt-grid' : ''}" data-group="${group.id}"${useGrid ? ' data-layout="grid"' : ''}>
-        <button type="button" class="filter-dropdown-trigger" aria-haspopup="listbox" aria-expanded="false">
-          <span class="filter-dropdown-value">${triggerLabel}</span>
-        </button>
-        <div class="filter-dropdown-panel" hidden>
-          <ul class="filter-dropdown-list${useGrid ? ' filter-dropdown-list--grid' : ''}" role="listbox">${options}</ul>
-        </div>
+            class="shape-toggle-btn${catalogState.shape === shape ? ' is-selected' : ''}"
+            data-shape="${shape}"
+            aria-pressed="${catalogState.shape === shape}"
+          >${shape}</button>`
+          )
+          .join('')}
       </div>
     </div>
   `;
 }
 
-function renderFinderDropdowns() {
-  const root = document.getElementById('finderFamilies');
+function seriesDetailHtml(group) {
+  const items = seriesProducts(group.id);
+  const product = selectedProduct();
+  const photoSrc = product ? product.image : seriesImage(group.id);
+  const photo = product
+    ? productPhotoHtml(product)
+    : photoSrc
+      ? `<img src="${photoSrc}" alt="${group.title}">`
+      : '';
+
+  const rows = product
+    ? specRows(product)
+        .map(([label, value]) => `<tr><th>${label}</th><td>${value}</td></tr>`)
+        .join('')
+    : '';
+
+  return `
+    <div class="series-detail">
+      <div class="finder-photo">${photo}</div>
+      <div class="finder-copy">
+        <div class="p-cat">${group.kicker}</div>
+        <h3>${group.title}</h3>
+        <p>${group.blurb}</p>
+        <div class="watt-block">
+          <div class="watt-label">Potencia</div>
+          ${wattPillsHtml(items)}
+        </div>
+        ${
+          product
+            ? `<table class="finder-specs"><tbody>${rows}</tbody></table>${addToCartButtonHtml(product)}`
+            : '<p class="finder-hint">Elige los watts para ver el modelo exacto.</p>'
+        }
+      </div>
+    </div>
+  `;
+}
+
+function seriesCardHtml(group) {
+  const selected = catalogState.series === group.id;
+  return `
+    <button type="button" class="series-card${selected ? ' is-selected' : ''}" data-series="${group.id}">
+      <span class="series-card-thumb">
+        <img src="${seriesImage(group.id)}" alt="">
+      </span>
+      <span class="series-card-copy">
+        <span class="p-cat">${group.kicker}</span>
+        <span class="series-card-title">${group.title}</span>
+      </span>
+    </button>
+  `;
+}
+
+function categoryCardHtml(section) {
+  const open = catalogState.category === section.id;
+  const note = section.eyebrow === 'Spots' ? ' <span class="cat-note">(spots)</span>' : '';
+  return `
+    <article class="cat-card${open ? ' is-open' : ''}" data-category="${section.id}">
+      <button type="button" class="cat-card-toggle" data-category="${section.id}" aria-expanded="${open}">
+        <span class="cat-card-thumb">
+          <img src="${section.image}" alt="">
+        </span>
+        <span class="cat-card-copy">
+          <span class="eyebrow">${section.eyebrow}</span>
+          <span class="cat-card-title">${section.title}${note}</span>
+          <span class="cat-card-intro">${section.intro}</span>
+        </span>
+        <span class="cat-card-chevron" aria-hidden="true">${open ? '−' : '+'}</span>
+      </button>
+      ${
+        open
+          ? `
+        <div class="cat-card-body">
+          ${section.hasShapeToggle ? shapeToggleHtml() : ''}
+          <div class="series-grid series-grid--${section.groups.length}">
+            ${section.groups.map(seriesCardHtml).join('')}
+          </div>
+          ${catalogState.series && groupMeta(catalogState.series)?.categoryId === section.id
+            ? seriesDetailHtml(groupMeta(catalogState.series))
+            : ''}
+        </div>`
+          : ''
+      }
+    </article>
+  `;
+}
+
+function catalogTreeHtml() {
+  return catalogSections.map(categoryCardHtml).join('');
+}
+
+function toggleCategory(categoryId) {
+  if (catalogState.category === categoryId) {
+    catalogState.category = '';
+    catalogState.series = '';
+    catalogState.watt = '';
+  } else {
+    catalogState.category = categoryId;
+    catalogState.series = '';
+    catalogState.watt = '';
+  }
+  renderCatalog();
+}
+
+function toggleSeries(seriesId) {
+  if (catalogState.series === seriesId) {
+    catalogState.series = '';
+    catalogState.watt = '';
+  } else {
+    catalogState.series = seriesId;
+    catalogState.watt = '';
+  }
+  renderCatalog();
+}
+
+function setShape(shape) {
+  catalogState.shape = shape;
+  const stillValid = seriesProducts(catalogState.series).some((p) => p.potencia === catalogState.watt);
+  if (!stillValid) catalogState.watt = '';
+  renderCatalog();
+}
+
+function setWatt(watt) {
+  catalogState.watt = watt;
+  renderCatalog();
+}
+
+function renderCatalog() {
+  const root = document.getElementById('catalogTree');
   if (!root) return;
-  root.innerHTML = finderFamilies().map(familyDropdownHtml).join('');
-}
-
-function closeAllFilterDropdowns() {
-  document.querySelectorAll('.filter-dropdown.open').forEach((dropdown) => {
-    dropdown.classList.remove('open');
-    const trigger = dropdown.querySelector('.filter-dropdown-trigger');
-    const panel = dropdown.querySelector('.filter-dropdown-panel');
-    if (trigger) trigger.setAttribute('aria-expanded', 'false');
-    if (panel) panel.hidden = true;
-  });
-}
-
-function openFilterDropdown(dropdown) {
-  closeAllFilterDropdowns();
-  const trigger = dropdown.querySelector('.filter-dropdown-trigger');
-  const panel = dropdown.querySelector('.filter-dropdown-panel');
-  dropdown.classList.add('open');
-  if (trigger) trigger.setAttribute('aria-expanded', 'true');
-  if (panel) panel.hidden = false;
-}
-
-function selectFinderProduct(productId) {
-  catalogState.productId = productId;
-  renderFinder();
-}
-
-function renderFinder() {
-  const stage = document.getElementById('productStage');
-  renderFinderDropdowns();
-  if (stage) stage.innerHTML = finderStageHtml();
+  root.innerHTML = catalogTreeHtml();
   if (typeof refreshProductCardButtons === 'function') {
     refreshProductCardButtons();
   }
 }
 
-function resetFinder() {
-  catalogState.productId = '';
-  renderFinder();
-}
+function initCatalog() {
+  const root = document.getElementById('catalogTree');
+  if (!root) return;
 
-function initFilterDropdowns() {
-  const bar = document.getElementById('finderFamilies');
-  if (!bar) return;
-
-  bar.addEventListener('click', (e) => {
-    const option = e.target.closest('.filter-dropdown-option');
-    if (option) {
-      e.preventDefault();
-      selectFinderProduct(option.dataset.productId);
+  root.addEventListener('click', (e) => {
+    const watt = e.target.closest('.watt-pill');
+    if (watt) {
+      setWatt(watt.dataset.watt);
       return;
     }
 
-    const trigger = e.target.closest('.filter-dropdown-trigger');
-    if (!trigger) return;
-    const dropdown = trigger.closest('.filter-dropdown');
-    if (!dropdown) return;
-    if (dropdown.classList.contains('open')) {
-      closeAllFilterDropdowns();
-    } else {
-      openFilterDropdown(dropdown);
+    const shape = e.target.closest('.shape-toggle-btn');
+    if (shape) {
+      setShape(shape.dataset.shape);
+      return;
+    }
+
+    const series = e.target.closest('.series-card');
+    if (series) {
+      toggleSeries(series.dataset.series);
+      return;
+    }
+
+    const category = e.target.closest('.cat-card-toggle');
+    if (category) {
+      toggleCategory(category.dataset.category);
     }
   });
 
-  document.getElementById('finderReset')?.addEventListener('click', resetFinder);
-
-  document.addEventListener('click', (e) => {
-    if (!e.target.closest('.filter-dropdown')) closeAllFilterDropdowns();
-  });
-
-  document.addEventListener('keydown', (e) => {
-    if (e.key !== 'Escape') return;
-    const openDropdown = document.querySelector('.filter-dropdown.open');
-    if (!openDropdown) return;
-    const trigger = openDropdown.querySelector('.filter-dropdown-trigger');
-    closeAllFilterDropdowns();
-    trigger?.focus();
-  });
+  renderCatalog();
 }
 
 function renderFeaturedCarousel() {
@@ -622,9 +665,4 @@ function renderFeaturedCarousel() {
 
 function initFeatured() {
   renderFeaturedCarousel();
-}
-
-function initCatalog() {
-  initFilterDropdowns();
-  renderFinder();
 }

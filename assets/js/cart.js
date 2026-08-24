@@ -100,9 +100,11 @@ function cartDestinationLabel() {
 }
 
 function formatCartLineSpecs(product) {
-  const parts = [product.temp];
+  const parts = [];
+  if (product.temp) parts.push(product.temp);
+  if (product.flujo) parts.push(product.flujo);
   if (product.forma && product.forma !== '—') parts.push(product.forma);
-  if (product.aplicacion) parts.push(product.aplicacion);
+  if (product.linea) parts.push(product.linea);
   return parts.join(' · ');
 }
 
@@ -202,7 +204,7 @@ function ensureCartShell() {
       <div class="cart-drawer-body">
         <ul class="cart-lines" id="cartLines"></ul>
         <div class="cart-empty" id="cartEmpty" hidden>
-          <p>Aún no hay productos. Agrega focos, spots o luminarias desde el catálogo.</p>
+          <p>Aún no hay productos. Agrega bombillos, empotrables o luminarias desde el catálogo.</p>
         </div>
       </div>
       <div class="cart-drawer-foot" id="cartDrawerFoot">

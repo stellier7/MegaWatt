@@ -618,13 +618,19 @@ a { color: inherit; }
   border-radius: 12px;
   overflow: hidden;
   background: #141312;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
 }
 
 .series-card-thumb img {
-  width: 100%;
-  height: 100%;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
   object-fit: contain;
-  padding: 6px;
+  object-position: center;
   display: block;
 }
 
@@ -702,14 +708,17 @@ a { color: inherit; }
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 12%;
 }
 
 .finder-photo img,
 .finder-photo video {
-  width: 100%;
-  height: 100%;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
   object-fit: contain;
-  padding: 8%;
+  object-position: center;
   display: block;
 }
 

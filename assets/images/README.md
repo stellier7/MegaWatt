@@ -15,7 +15,7 @@ logo.jpeg
 
 ## Official catalog crops (`assets/images/catalog/`)
 
-Studio shots cropped from the MegaWatt PDF. Used as section art and as product photos when a unique packaging shot is not available.
+Studio shots cropped from the MegaWatt PDF. The catalog finder uses these instead of packaging photos: one image per series, then the wattage unlocks the exact SKU and spec sheet.
 
 ```
 bombillo-smd.jpeg

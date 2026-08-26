@@ -59,6 +59,7 @@ function initGalleryDragCarousel() {
 
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const itemCount = galleryItems.length;
+  const autoAdvanceMs = 5500;
 
   let offset = 0;
   let isDragging = false;
@@ -70,6 +71,9 @@ function initGalleryDragCarousel() {
   let lastTime = 0;
   let snapTimer = 0;
   let snapTransitionHandler = null;
+  let autoPaused = false;
+  let autoTimer = 0;
+  let inView = true;
 
   const applyTransform = () => {
     track.style.transform = `translate3d(-${offset}px, 0, 0)`;
@@ -164,18 +168,39 @@ function initGalleryDragCarousel() {
     track.classList.remove('is-snapping');
   };
 
+  const isAutoAdvanceBlocked = () =>
+    reducedMotion ||
+    autoPaused ||
+    !inView ||
+    isDragging ||
+    document.body.classList.contains('gallery-lightbox-open') ||
+    track.classList.contains('is-snapping');
+
+  const clearAutoAdvance = () => {
+    if (autoTimer) {
+      clearTimeout(autoTimer);
+      autoTimer = 0;
+    }
+  };
+
+  const scheduleAutoAdvance = () => {
+    clearAutoAdvance();
+    if (isAutoAdvanceBlocked()) return;
+    autoTimer = window.setTimeout(() => {
+      autoTimer = 0;
+      advanceToNext();
+    }, autoAdvanceMs);
+  };
+
   const finishSnap = (targetOffset, targetIdx) => {
     clearSnap();
     offset = targetOffset;
     applyTransform();
     normalizeLoop(targetIdx);
+    scheduleAutoAdvance();
   };
 
-  const snapTo = (releaseVelocity = 0) => {
-    if (isDragging) return;
-
-    const { targetOffset, targetIdx } = pickTarget(offset, releaseVelocity);
-
+  const animateToTarget = (targetOffset, targetIdx) => {
     if (Math.abs(targetOffset - offset) < 0.5 || reducedMotion) {
       finishSnap(targetOffset, targetIdx);
       return;
@@ -197,9 +222,32 @@ function initGalleryDragCarousel() {
     });
   };
 
+  const snapTo = (releaseVelocity = 0) => {
+    if (isDragging) return;
+    clearAutoAdvance();
+    const { targetOffset, targetIdx } = pickTarget(offset, releaseVelocity);
+    animateToTarget(targetOffset, targetIdx);
+  };
+
+  const snapByStep = (direction) => {
+    if (isDragging) return;
+    clearAutoAdvance();
+    clearSnap();
+    offset = readCurrentOffset();
+    const { pitch } = getMetrics();
+    const { targetOffset, targetIdx } = pickTarget(offset + direction * pitch * 0.35, direction * 0.2);
+    animateToTarget(targetOffset, targetIdx);
+  };
+
+  const advanceToNext = () => {
+    if (isAutoAdvanceBlocked()) return;
+    snapByStep(1);
+  };
+
   const onPointerDown = (e) => {
     if (e.pointerType === 'mouse' && e.button !== 0) return;
     clearSnap();
+    clearAutoAdvance();
     isDragging = true;
     moved = 0;
     startX = e.clientX;
@@ -245,7 +293,10 @@ function initGalleryDragCarousel() {
       }
     });
 
-    if (moved <= 10) return;
+    if (moved <= 10) {
+      scheduleAutoAdvance();
+      return;
+    }
     snapTo(velocity);
   };
 
@@ -261,33 +312,39 @@ function initGalleryDragCarousel() {
       if (!delta || isDragging) return;
 
       e.preventDefault();
-      clearSnap();
-      offset = readCurrentOffset();
-
       const direction = delta > 0 ? 1 : -1;
-      const { pitch } = getMetrics();
-      const { targetOffset, targetIdx } = pickTarget(offset + direction * pitch * 0.35, direction * 0.2);
-
-      if (Math.abs(targetOffset - offset) < 0.5 || reducedMotion) {
-        finishSnap(targetOffset, targetIdx);
-        return;
-      }
-
-      track.classList.add('is-snapping');
-      snapTransitionHandler = (ev) => {
-        if (ev.target !== track || ev.propertyName !== 'transform') return;
-        finishSnap(targetOffset, targetIdx);
-      };
-      track.addEventListener('transitionend', snapTransitionHandler);
-      snapTimer = window.setTimeout(() => finishSnap(targetOffset, targetIdx), 280);
-
-      requestAnimationFrame(() => {
-        offset = targetOffset;
-        applyTransform();
-      });
+      snapByStep(direction);
     },
     { passive: false }
   );
+
+  if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    carousel.addEventListener('mouseenter', () => {
+      autoPaused = true;
+      clearAutoAdvance();
+    });
+    carousel.addEventListener('mouseleave', () => {
+      autoPaused = false;
+      scheduleAutoAdvance();
+    });
+  }
+
+  document.addEventListener('gallery-lightbox-change', (e) => {
+    if (e.detail?.open) clearAutoAdvance();
+    else scheduleAutoAdvance();
+  });
+
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver(
+      (entries) => {
+        inView = entries.some((entry) => entry.isIntersecting);
+        if (inView) scheduleAutoAdvance();
+        else clearAutoAdvance();
+      },
+      { threshold: 0.2 }
+    );
+    io.observe(carousel);
+  }
 
   const onLayout = () => {
     if (isDragging) return;
@@ -373,6 +430,7 @@ function initGalleryLightbox() {
     lightbox.hidden = false;
     lightbox.classList.add('open');
     document.body.classList.add('gallery-lightbox-open');
+    document.dispatchEvent(new CustomEvent('gallery-lightbox-change', { detail: { open: true } }));
     renderSlide(index);
     lightbox.querySelector('.gallery-lightbox-close')?.focus();
   };
@@ -385,6 +443,7 @@ function initGalleryLightbox() {
     lightbox.classList.remove('open');
     lightbox.hidden = true;
     document.body.classList.remove('gallery-lightbox-open');
+    document.dispatchEvent(new CustomEvent('gallery-lightbox-change', { detail: { open: false } }));
     if (lastFocus && typeof lastFocus.focus === 'function') lastFocus.focus();
   };
 

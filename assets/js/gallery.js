@@ -57,23 +57,29 @@ function initGalleryDragCarousel() {
   const track = document.getElementById('galleryTrack');
   if (!carousel || !track || galleryItems.length < 2) return;
 
+  const scrollSpeed = 0.35;
+  const dragThreshold = 6;
+  const dragResumeDelay = 600;
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const itemCount = galleryItems.length;
-  const autoAdvanceMs = 5500;
 
   let offset = 0;
+  let paused = reducedMotion;
+  let inView = true;
+  let loopWidth = 0;
+  let rafId = 0;
+  let resumeTimer = 0;
+  let momentumId = 0;
+
   let isDragging = false;
+  let gestureMode = null;
   let startX = 0;
+  let startY = 0;
   let startOffset = 0;
   let moved = 0;
-  let velocity = 0;
   let lastX = 0;
   let lastTime = 0;
-  let snapTimer = 0;
-  let snapTransitionHandler = null;
-  let autoPaused = false;
-  let autoTimer = 0;
-  let inView = true;
+  let velocity = 0;
+  let activePointerId = null;
 
   const applyTransform = () => {
     track.style.transform = `translate3d(-${offset}px, 0, 0)`;
@@ -85,223 +91,189 @@ function initGalleryDragCarousel() {
     return -new DOMMatrix(transform).m41;
   };
 
-  const getMetrics = () => {
-    const slides = Array.from(track.querySelectorAll('.gallery-slide'));
-    const center = carousel.clientWidth / 2;
-    const positions = slides.map((slide) => slide.offsetLeft + slide.offsetWidth / 2 - center);
-    const pitch = positions.length > 1 ? positions[1] - positions[0] : slides[0]?.offsetWidth + 20 || 360;
-    return { positions, pitch };
+  const measure = () => {
+    loopWidth = track.scrollWidth / 2;
+    normalizeOffset();
   };
 
-  const pickTarget = (currentOffset, releaseVelocity = 0) => {
-    const { positions, pitch } = getMetrics();
-    if (!positions.length) return { targetOffset: 0, targetIdx: 0 };
-
-    let nearestIdx = 0;
-    let nearestDist = Infinity;
-    positions.forEach((candidate, i) => {
-      const dist = Math.abs(candidate - currentOffset);
-      if (dist < nearestDist) {
-        nearestDist = dist;
-        nearestIdx = i;
-      }
-    });
-
-    const dragDelta = currentOffset - positions[nearestIdx];
-    const flickThreshold = pitch * 0.14;
-    let targetIdx = nearestIdx;
-
-    if (dragDelta > flickThreshold || releaseVelocity < -0.12) {
-      targetIdx = nearestIdx + 1;
-    } else if (dragDelta < -flickThreshold || releaseVelocity > 0.12) {
-      targetIdx = nearestIdx - 1;
-    }
-
-    if (targetIdx < 0) targetIdx = itemCount - 1;
-    else if (targetIdx >= positions.length) targetIdx = itemCount;
-
-    const mod = ((targetIdx % itemCount) + itemCount) % itemCount;
-    let finalIdx = mod;
-    let finalOffset = positions[mod];
-
-    [mod, mod + itemCount].forEach((i) => {
-      if (i < positions.length) {
-        const candidate = positions[i];
-        if (Math.abs(candidate - currentOffset) < Math.abs(finalOffset - currentOffset)) {
-          finalOffset = candidate;
-          finalIdx = i;
-        }
-      }
-    });
-
-    if (targetIdx !== mod && targetIdx !== mod + itemCount && targetIdx < positions.length) {
-      finalIdx = targetIdx;
-      finalOffset = positions[targetIdx];
-    }
-
-    return { targetOffset: finalOffset, targetIdx: finalIdx };
-  };
-
-  const normalizeLoop = (targetIdx) => {
-    if (targetIdx == null || targetIdx < itemCount) return;
-    const { positions } = getMetrics();
-    const normalizedIdx = targetIdx - itemCount;
-    if (normalizedIdx >= 0 && normalizedIdx < positions.length) {
-      offset = positions[normalizedIdx];
-      applyTransform();
-    }
-  };
-
-  const clearSnap = () => {
-    if (snapTimer) {
-      clearTimeout(snapTimer);
-      snapTimer = 0;
-    }
-    if (snapTransitionHandler) {
-      track.removeEventListener('transitionend', snapTransitionHandler);
-      snapTransitionHandler = null;
-    }
-    if (track.classList.contains('is-snapping')) {
-      offset = readCurrentOffset();
-      applyTransform();
-    }
-    track.classList.remove('is-snapping');
-  };
-
-  const isAutoAdvanceBlocked = () =>
-    reducedMotion ||
-    autoPaused ||
-    !inView ||
-    isDragging ||
-    document.body.classList.contains('gallery-lightbox-open') ||
-    track.classList.contains('is-snapping');
-
-  const clearAutoAdvance = () => {
-    if (autoTimer) {
-      clearTimeout(autoTimer);
-      autoTimer = 0;
-    }
-  };
-
-  const scheduleAutoAdvance = () => {
-    clearAutoAdvance();
-    if (isAutoAdvanceBlocked()) return;
-    autoTimer = window.setTimeout(() => {
-      autoTimer = 0;
-      advanceToNext();
-    }, autoAdvanceMs);
-  };
-
-  const finishSnap = (targetOffset, targetIdx) => {
-    clearSnap();
-    offset = targetOffset;
+  const normalizeOffset = () => {
+    if (loopWidth <= 0) return;
+    while (offset >= loopWidth) offset -= loopWidth;
+    while (offset < 0) offset += loopWidth;
     applyTransform();
-    normalizeLoop(targetIdx);
-    scheduleAutoAdvance();
   };
 
-  const animateToTarget = (targetOffset, targetIdx) => {
-    if (Math.abs(targetOffset - offset) < 0.5 || reducedMotion) {
-      finishSnap(targetOffset, targetIdx);
+  const pause = () => {
+    paused = true;
+  };
+
+  const resume = () => {
+    if (!reducedMotion) paused = false;
+  };
+
+  const scheduleResume = () => {
+    window.clearTimeout(resumeTimer);
+    resumeTimer = window.setTimeout(resume, dragResumeDelay);
+  };
+
+  const stopMomentum = () => {
+    if (momentumId) {
+      cancelAnimationFrame(momentumId);
+      momentumId = 0;
+    }
+  };
+
+  const startMomentum = () => {
+    stopMomentum();
+    if (Math.abs(velocity) < 0.15) {
+      scheduleResume();
       return;
     }
 
-    clearSnap();
-    track.classList.add('is-snapping');
+    let lastFrame = performance.now();
+    const step = (now) => {
+      const dt = now - lastFrame;
+      lastFrame = now;
+      offset -= velocity * dt;
+      velocity *= 0.92;
+      normalizeOffset();
 
-    snapTransitionHandler = (e) => {
-      if (e.target !== track || e.propertyName !== 'transform') return;
-      finishSnap(targetOffset, targetIdx);
+      if (Math.abs(velocity) > 0.05) {
+        momentumId = requestAnimationFrame(step);
+      } else {
+        momentumId = 0;
+        scheduleResume();
+      }
     };
-    track.addEventListener('transitionend', snapTransitionHandler);
-    snapTimer = window.setTimeout(() => finishSnap(targetOffset, targetIdx), 280);
+    momentumId = requestAnimationFrame(step);
+  };
 
-    requestAnimationFrame(() => {
-      offset = targetOffset;
-      applyTransform();
+  const tick = () => {
+    if (!paused && !momentumId && inView && loopWidth > 0) {
+      offset += scrollSpeed;
+      normalizeOffset();
+    }
+    rafId = requestAnimationFrame(tick);
+  };
+
+  const start = () => {
+    measure();
+    if (!rafId) rafId = requestAnimationFrame(tick);
+  };
+
+  if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    carousel.addEventListener('mouseenter', pause);
+    carousel.addEventListener('mouseleave', () => {
+      if (!isDragging && !momentumId) resume();
     });
-  };
+  }
 
-  const snapTo = (releaseVelocity = 0) => {
-    if (isDragging) return;
-    clearAutoAdvance();
-    const { targetOffset, targetIdx } = pickTarget(offset, releaseVelocity);
-    animateToTarget(targetOffset, targetIdx);
-  };
+  document.addEventListener('gallery-lightbox-change', (e) => {
+    if (e.detail?.open) {
+      pause();
+      stopMomentum();
+      window.clearTimeout(resumeTimer);
+    } else {
+      scheduleResume();
+    }
+  });
 
-  const snapByStep = (direction) => {
-    if (isDragging) return;
-    clearAutoAdvance();
-    clearSnap();
-    offset = readCurrentOffset();
-    const { pitch } = getMetrics();
-    const { targetOffset, targetIdx } = pickTarget(offset + direction * pitch * 0.35, direction * 0.2);
-    animateToTarget(targetOffset, targetIdx);
-  };
-
-  const advanceToNext = () => {
-    if (isAutoAdvanceBlocked()) return;
-    snapByStep(1);
+  const resetGesture = () => {
+    isDragging = false;
+    gestureMode = null;
+    activePointerId = null;
+    carousel.classList.remove('is-dragging');
   };
 
   const onPointerDown = (e) => {
     if (e.pointerType === 'mouse' && e.button !== 0) return;
-    clearSnap();
-    clearAutoAdvance();
-    isDragging = true;
+    stopMomentum();
+    window.clearTimeout(resumeTimer);
+    pause();
+
+    gestureMode = null;
+    isDragging = false;
+    activePointerId = e.pointerId;
     moved = 0;
+    velocity = 0;
     startX = e.clientX;
+    startY = e.clientY;
     lastX = e.clientX;
     lastTime = performance.now();
     startOffset = readCurrentOffset();
     offset = startOffset;
-    velocity = 0;
-    carousel.classList.add('is-dragging');
-    carousel.setPointerCapture(e.pointerId);
+    normalizeOffset();
+    startOffset = offset;
   };
 
   const onPointerMove = (e) => {
-    if (!isDragging) return;
-    const now = performance.now();
-    const delta = e.clientX - startX;
-    moved = Math.max(moved, Math.abs(delta));
+    if (activePointerId !== e.pointerId) return;
 
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+    const absDx = Math.abs(dx);
+    const absDy = Math.abs(dy);
+
+    if (gestureMode === null) {
+      if (absDx < dragThreshold && absDy < dragThreshold) return;
+      gestureMode = absDx > absDy * 1.1 ? 'horizontal' : 'vertical';
+      if (gestureMode === 'horizontal') {
+        isDragging = true;
+        carousel.classList.add('is-dragging');
+        carousel.setPointerCapture(e.pointerId);
+      } else {
+        return;
+      }
+    }
+
+    if (gestureMode === 'vertical' || !isDragging) return;
+
+    e.preventDefault();
+    const now = performance.now();
     if (now - lastTime > 0) {
       velocity = (e.clientX - lastX) / (now - lastTime);
     }
     lastX = e.clientX;
     lastTime = now;
 
-    offset = startOffset - delta;
-    applyTransform();
+    moved = Math.max(moved, absDx);
+    offset = startOffset - dx;
+    normalizeOffset();
+    startOffset = offset + dx;
   };
 
   const onPointerUp = (e) => {
-    if (!isDragging) return;
-    isDragging = false;
-    carousel.classList.remove('is-dragging');
-    if (carousel.hasPointerCapture?.(e.pointerId)) {
-      carousel.releasePointerCapture(e.pointerId);
-    }
+    if (activePointerId !== e.pointerId) return;
 
-    carousel.querySelectorAll('.gallery-slide').forEach((slide) => {
-      slide.dataset.dragged = moved > 10 ? 'true' : 'false';
-      if (moved > 10) {
-        window.setTimeout(() => {
-          slide.dataset.dragged = 'false';
-        }, 0);
+    if (isDragging) {
+      if (carousel.hasPointerCapture?.(e.pointerId)) {
+        carousel.releasePointerCapture(e.pointerId);
       }
-    });
+      normalizeOffset();
 
-    if (moved <= 10) {
-      scheduleAutoAdvance();
-      return;
+      carousel.querySelectorAll('.gallery-slide').forEach((slide) => {
+        slide.dataset.dragged = moved > 10 ? 'true' : 'false';
+        if (moved > 10) {
+          window.setTimeout(() => {
+            slide.dataset.dragged = 'false';
+          }, 0);
+        }
+      });
+
+      if (moved > 10) {
+        startMomentum();
+      } else {
+        resume();
+      }
+    } else if (gestureMode === 'vertical' || gestureMode === null) {
+      resume();
     }
-    snapTo(velocity);
+
+    resetGesture();
   };
 
   carousel.addEventListener('pointerdown', onPointerDown);
-  carousel.addEventListener('pointermove', onPointerMove);
+  carousel.addEventListener('pointermove', onPointerMove, { passive: false });
   carousel.addEventListener('pointerup', onPointerUp);
   carousel.addEventListener('pointercancel', onPointerUp);
 
@@ -312,61 +284,52 @@ function initGalleryDragCarousel() {
       if (!delta || isDragging) return;
 
       e.preventDefault();
-      const direction = delta > 0 ? 1 : -1;
-      snapByStep(direction);
+      stopMomentum();
+      pause();
+      window.clearTimeout(resumeTimer);
+      offset = readCurrentOffset();
+      offset += delta;
+      normalizeOffset();
+      scheduleResume();
     },
     { passive: false }
   );
 
-  if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
-    carousel.addEventListener('mouseenter', () => {
-      autoPaused = true;
-      clearAutoAdvance();
-    });
-    carousel.addEventListener('mouseleave', () => {
-      autoPaused = false;
-      scheduleAutoAdvance();
-    });
+  if ('ResizeObserver' in window) {
+    const ro = new ResizeObserver(measure);
+    ro.observe(track);
+    ro.observe(carousel);
+  } else {
+    window.addEventListener('resize', measure, { passive: true });
   }
 
-  document.addEventListener('gallery-lightbox-change', (e) => {
-    if (e.detail?.open) clearAutoAdvance();
-    else scheduleAutoAdvance();
-  });
+  window.addEventListener(
+    'orientationchange',
+    () => window.setTimeout(measure, 250),
+    { passive: true }
+  );
 
   if ('IntersectionObserver' in window) {
     const io = new IntersectionObserver(
       (entries) => {
         inView = entries.some((entry) => entry.isIntersecting);
-        if (inView) scheduleAutoAdvance();
-        else clearAutoAdvance();
+        if (inView) measure();
       },
-      { threshold: 0.2 }
+      { threshold: 0.08 }
     );
     io.observe(carousel);
   }
 
-  const onLayout = () => {
-    if (isDragging) return;
-    const { targetOffset, targetIdx } = pickTarget(readCurrentOffset(), 0);
-    finishSnap(targetOffset, targetIdx);
-  };
+  start();
 
-  if ('ResizeObserver' in window) {
-    const ro = new ResizeObserver(onLayout);
-    ro.observe(track);
-    ro.observe(carousel);
-  } else {
-    window.addEventListener('resize', onLayout, { passive: true });
-  }
+  track.querySelectorAll('img, video').forEach((el) => {
+    el.addEventListener('load', measure, { once: true });
+    el.addEventListener('loadeddata', measure, { once: true });
+    el.addEventListener('error', measure, { once: true });
+  });
 
-  window.addEventListener(
-    'orientationchange',
-    () => window.setTimeout(onLayout, 250),
-    { passive: true }
-  );
-
-  requestAnimationFrame(() => snapTo(0));
+  window.setTimeout(measure, 400);
+  window.setTimeout(measure, 1500);
 }
 
 function ensureGalleryLightbox() {

@@ -1,9 +1,8 @@
 const galleryItems = [
   {
     type: 'image',
-    src: 'assets/images/gallery/gallery1.jpeg',
-    caption: 'MegaWatt',
-    objectPosition: 'center 22%',
+    src: 'assets/images/gallery/gallery2.jpeg',
+    caption: 'Iluminación LED',
   },
   {
     type: 'video',
@@ -11,14 +10,15 @@ const galleryItems = [
     caption: 'Producto en acción',
   },
   {
-    type: 'image',
-    src: 'assets/images/gallery/gallery2.jpeg',
-    caption: 'Iluminación LED',
-  },
-  {
     type: 'video',
     src: 'assets/images/gallery/gallery-video2.mov',
     caption: 'Demostración',
+  },
+  {
+    type: 'image',
+    src: 'assets/images/gallery/gallery1.jpeg',
+    caption: 'MegaWatt',
+    objectPosition: 'center 22%',
   },
 ];
 

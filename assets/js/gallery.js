@@ -1,5 +1,10 @@
 const galleryItems = [
   {
+    type: 'video',
+    src: 'assets/images/gallery/gallery-video2.mov',
+    caption: 'Demostración',
+  },
+  {
     type: 'image',
     src: 'assets/images/gallery/gallery2.jpeg',
     caption: 'Iluminación LED',
@@ -8,11 +13,6 @@ const galleryItems = [
     type: 'video',
     src: 'assets/images/gallery/gallery-video1.mov',
     caption: 'Producto en acción',
-  },
-  {
-    type: 'video',
-    src: 'assets/images/gallery/gallery-video2.mov',
-    caption: 'Demostración',
   },
   {
     type: 'image',
